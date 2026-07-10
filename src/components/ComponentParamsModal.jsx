@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
+import NumberInput from './NumberInput';
 
 const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentType }) => {
   const [uF, setUF] = useState(initialParams.uF || 100);
   const [voltage, setVoltage] = useState(initialParams.voltage || 25);
+  
+  const [pins, setPins] = useState(initialParams.pins || 4);
+  const [baseColor, setBaseColor] = useState(initialParams.baseColor || '#111111');
   
   // Dragging logic
   const [isDragging, setIsDragging] = useState(false);
@@ -41,10 +45,15 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
   }, [isDragging, dragOffset]);
 
   const handleSave = () => {
-    onSave({ uF, voltage });
+    if (isCapacitor) {
+      onSave({ uF, voltage });
+    } else if (isMaleHeader) {
+      onSave({ pins, baseColor });
+    }
   };
 
   const isCapacitor = componentType === 'capacitor' || componentType === 'electrolytic';
+  const isMaleHeader = componentType === 'male_header';
 
   return (
     <div 
@@ -90,35 +99,48 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Capacitance (µF)</label>
-              <input 
-                type="number" 
+              <NumberInput 
                 value={uF}
-                onChange={(e) => setUF(parseFloat(e.target.value) || 0)}
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  background: 'rgba(0,0,0,0.3)',
-                  border: '1px solid var(--border-subtle)',
-                  color: 'white',
-                  padding: '8px',
-                  borderRadius: '6px'
-                }}
+                onChange={(val) => setUF(val)}
+                min={1}
               />
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Voltage (V)</label>
-              <input 
-                type="number" 
+              <NumberInput 
                 value={voltage}
-                onChange={(e) => setVoltage(parseFloat(e.target.value) || 0)}
+                onChange={(val) => setVoltage(val)}
+                min={1}
+              />
+            </div>
+          </div>
+        )}
+        {isMaleHeader && (
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Number of Pins</label>
+              <NumberInput 
+                value={pins}
+                onChange={(val) => setPins(val)}
+                min={1}
+                max={40}
+              />
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Base Color</label>
+              <input 
+                type="color" 
+                value={baseColor}
+                onChange={(e) => setBaseColor(e.target.value)}
                 style={{
                   width: '100%',
+                  height: '35px',
                   boxSizing: 'border-box',
                   background: 'rgba(0,0,0,0.3)',
                   border: '1px solid var(--border-subtle)',
-                  color: 'white',
-                  padding: '8px',
-                  borderRadius: '6px'
+                  borderRadius: '6px',
+                  padding: '2px',
+                  cursor: 'pointer'
                 }}
               />
             </div>

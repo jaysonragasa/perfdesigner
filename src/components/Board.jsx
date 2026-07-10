@@ -412,14 +412,18 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
         ))}
 
         {/* Links (Nets) */}
-        {[...layers].reverse().map(layerItem => {
-          if (!layerItem.visible) return null;
-          const layerLinks = links.filter(l => l.layer === layerItem.id);
+        {(() => {
+          const globallyOrderedLinks = [];
+          [...layers].reverse().forEach(layerItem => {
+            if (layerItem.visible) {
+              globallyOrderedLinks.push(...links.filter(l => l.layer === layerItem.id));
+            }
+          });
           
-          return layerLinks.map((link, linkIndex) => {
+          return globallyOrderedLinks.map((link, globalIndex) => {
             if (link.points.length === 0) return null;
             const isBottom = link.layer === 'bottom';
-            const pathString = generateLinkPath(link, linkIndex, layerLinks);
+            const pathString = generateLinkPath(link, globalIndex, globallyOrderedLinks);
             
             return (
               <g key={link.id} opacity={dimInactiveLayers ? (activeLayerId === link.layer ? 1 : 0.4) : 1}>
@@ -459,7 +463,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
               </g>
             );
           });
-        })}
+        })()}
 
         {/* Drawn Components */}
         {layers.find(l => l.id === 'top')?.visible !== false && components.map(comp => (

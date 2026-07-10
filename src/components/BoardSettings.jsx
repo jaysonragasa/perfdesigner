@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
+import NumberInput from './NumberInput';
 
 const BoardSettings = ({ onClose, onSave, currentWidth, currentHeight, showGoldBorder, setShowGoldBorder, dimInactiveLayers, setDimInactiveLayers, boardColor, setBoardColor }) => {
   const [widthMM, setWidthMM] = useState((currentWidth * 2.54).toFixed(2));
@@ -87,38 +88,20 @@ const BoardSettings = ({ onClose, onSave, currentWidth, currentHeight, showGoldB
         <div style={{ display: 'flex', gap: '16px' }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Width (mm)</label>
-            <input 
-              type="number" 
-              step="0.1"
+            <NumberInput 
               value={widthMM}
-              onChange={(e) => setWidthMM(e.target.value)}
-              style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                background: 'rgba(0,0,0,0.3)',
-                border: '1px solid var(--border-subtle)',
-                color: 'white',
-                padding: '8px',
-                borderRadius: '6px'
-              }}
+              onChange={(val) => setWidthMM(val)}
+              min={25.4}
+              step={2.54}
             />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Height (mm)</label>
-            <input 
-              type="number" 
-              step="0.1"
+            <NumberInput 
               value={heightMM}
-              onChange={(e) => setHeightMM(e.target.value)}
-              style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                background: 'rgba(0,0,0,0.3)',
-                border: '1px solid var(--border-subtle)',
-                color: 'white',
-                padding: '8px',
-                borderRadius: '6px'
-              }}
+              onChange={(val) => setHeightMM(val)}
+              min={25.4}
+              step={2.54}
             />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>

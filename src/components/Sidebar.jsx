@@ -21,7 +21,8 @@ const CATEGORIES = [
   {
     name: 'Connectors',
     items: [
-      { id: 'header4', name: 'Header (4-pin)', icon: 'H' },
+      { id: 'header4', name: 'Female Header (4-pin)', icon: 'H' },
+      { id: 'male_header', name: 'Male Header', icon: 'M' },
     ]
   }
 ];
@@ -69,7 +70,7 @@ const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelected
                   <div 
                     style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}
                     onClick={() => {
-                      if (comp.id === 'capacitor' || comp.id === 'electrolytic') {
+                      if (comp.id === 'capacitor' || comp.id === 'electrolytic' || comp.id === 'male_header') {
                         if (setShowComponentParams) setShowComponentParams({ type: comp.id });
                       } else {
                         setSelectedComponentType(comp.id);

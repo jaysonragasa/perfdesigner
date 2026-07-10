@@ -118,6 +118,8 @@ function App() {
     const designData = {
       boardSize,
       boardColor,
+      showGoldBorder,
+      dimInactiveLayers,
       components,
       links,
       customComponents,
@@ -142,6 +144,8 @@ function App() {
         const data = JSON.parse(event.target.result);
         if (data.boardSize) setBoardSize(data.boardSize);
         if (data.boardColor) setBoardColor(data.boardColor);
+        if (data.showGoldBorder !== undefined) setShowGoldBorder(data.showGoldBorder);
+        if (data.dimInactiveLayers !== undefined) setDimInactiveLayers(data.dimInactiveLayers);
         if (data.components) setComponents(data.components);
         if (data.links) setLinks(data.links);
         if (data.customComponents) setCustomComponents(data.customComponents);
@@ -293,7 +297,7 @@ function App() {
               if (comp && comp.type.startsWith('custom_')) {
                 const def = customComponents.find(c => c.id === comp.type);
                 if (def) setShowComponentCreator(def);
-              } else if (comp && (comp.type === 'capacitor' || comp.type === 'electrolytic')) {
+              } else if (comp && (comp.type === 'capacitor' || comp.type === 'electrolytic' || comp.type === 'male_header')) {
                 setShowComponentParams({ type: comp.type, editingId: comp.id, params: comp.params });
               }
             }}

@@ -17,6 +17,10 @@ export const Resistor = ({ x, y, layer, rotation = 0 }) => {
       <rect x={length/2 - 5} y="-8" width="3" height="16" fill="#29cc29" />
       <rect x={length/2 + 2} y="-8" width="3" height="16" fill="#000" />
       <rect x={length/2 + 8} y="-8" width="3" height="16" fill="#cca300" />
+      
+      {/* Pins */}
+      <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
+      <rect x={length - 3} y="-3" width="6" height="6" fill="#d4af37" />
     </g>
   );
 };
@@ -30,6 +34,11 @@ export const Capacitor = ({ x, y, layer, rotation = 0, params }) => {
     <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
       <line x1="0" y1="0" x2={length} y2="0" stroke="#silver" strokeWidth="2" />
       <circle cx={length/2} cy="0" r={r} fill="#d99b28" stroke="#b07b1a" strokeWidth="1" />
+      
+      {/* Pins */}
+      <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
+      <rect x={length - 3} y="-3" width="6" height="6" fill="#d4af37" />
+
       {params?.uF && (
         <text x={length/2} y={isLarge ? -18 : -12} fill="white" fontSize="10" textAnchor="middle">{params.uF}µF</text>
       )}
@@ -49,6 +58,11 @@ export const Electrolytic = ({ x, y, layer, rotation = 0, params }) => {
       <path d={`M ${length/2} -${r} A ${r} ${r} 0 0 1 ${length/2} ${r}`} fill="#ccc" />
       {/* Minus sign on the negative side */}
       <line x1={length/2 + r/2 - 3} y1="0" x2={length/2 + r/2 + 3} y2="0" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
+      
+      {/* Pins */}
+      <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
+      <rect x={length - 3} y="-3" width="6" height="6" fill="#d4af37" />
+
       {params?.uF && (
         <text x={length/2} y={isLarge ? -20 : -14} fill="white" fontSize="10" textAnchor="middle">{params.uF}µF</text>
       )}
@@ -65,6 +79,10 @@ export const LED = ({ x, y, layer, rotation = 0 }) => {
       <circle cx={length/2} cy="0" r="6" fill="#ff3333" stroke="#cc0000" strokeWidth="1" opacity="0.8" />
       {/* Flat edge for cathode */}
       <line x1={length/2 + 5} y1="-5" x2={length/2 + 5} y2="5" stroke="#cc0000" strokeWidth="2" />
+      
+      {/* Pins */}
+      <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
+      <rect x={length - 3} y="-3" width="6" height="6" fill="#d4af37" />
     </g>
   );
 };
@@ -90,6 +108,20 @@ export const Header = ({ x, y, layer, rotation = 0 }) => {
       <rect x={SPACING-4} y="-4" width="8" height="8" fill="#gold" />
       <rect x={2*SPACING-4} y="-4" width="8" height="8" fill="#gold" />
       <rect x={3*SPACING-4} y="-4" width="8" height="8" fill="#gold" />
+    </g>
+  );
+};
+
+export const MaleHeader = ({ x, y, layer, rotation = 0, params }) => {
+  const pins = params?.pins || 4;
+  const baseColor = params?.baseColor || '#111111';
+  
+  return (
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+      <rect x="-5" y="-7" width={(pins - 1) * SPACING + 10} height="14" fill={baseColor} rx="1" />
+      {Array.from({ length: pins }).map((_, i) => (
+        <rect key={i} x={i * SPACING - 3} y="-3" width="6" height="6" fill="#d4af37" />
+      ))}
     </g>
   );
 };
@@ -157,6 +189,7 @@ export const renderComponent = (comp, layer, customComponents = []) => {
     case 'dip8': return <DIP8 {...props} />;
     case 'dip16': return <DIP8 {...props} />; // Placeholder for dip16
     case 'header4': return <Header {...props} />;
+    case 'male_header': return <MaleHeader {...props} />;
     default: return null;
   }
 };
