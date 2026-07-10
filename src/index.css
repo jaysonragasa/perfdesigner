@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Layout */
+  --sidebar-width: 280px;
+  --toolbar-height: 60px;
+
+  /* Colors - Base */
+  --bg-primary: #0a0c10;
+  --bg-panel: rgba(255, 255, 255, 0.03);
+  --bg-panel-hover: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 255, 255, 0.2);
+  
+  /* Colors - Text */
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  
+  /* Colors - Accents */
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-glow: rgba(59, 130, 246, 0.4);
+  
+  /* Colors - PCB */
+  --pcb-base: #142e1d;
+  --copper: #c77948;
+  --copper-hover: #e0966a;
+  --pad-hole: #080a0c;
+  --solder: #cbd5e1;
+  --solder-hover: #e2e8f0;
+  --wire: #10b981;
+  --wire-hover: #34d399;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(15, 17, 26, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(12px);
+  
+  /* Transitions */
+  --trans-fast: 0.15s ease;
+  --trans-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Glass panel utility */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Beautiful custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Button Reset */
+button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
