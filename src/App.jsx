@@ -42,6 +42,10 @@ function App() {
     }
   }, [activeTool]);
 
+  useEffect(() => {
+    setActiveLinkId(null);
+  }, [activeLayerId]);
+
   // Press ESC to end current link
   useEffect(() => {
     const handleKeyDown = (e) => {

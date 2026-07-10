@@ -104,24 +104,25 @@ const BoardSettings = ({ onClose, onSave, currentWidth, currentHeight, showGoldB
               step={2.54}
             />
           </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Color</label>
-            <input 
-              type="color" 
-              value={boardColor}
-              onChange={(e) => setBoardColor(e.target.value)}
-              style={{
-                width: '100%',
-                height: '35px',
-                boxSizing: 'border-box',
-                background: 'rgba(0,0,0,0.3)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '6px',
-                padding: '2px',
-                cursor: 'pointer'
-              }}
-            />
-          </div>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Color</label>
+          <input 
+            type="color" 
+            value={boardColor}
+            onChange={(e) => setBoardColor(e.target.value)}
+            style={{
+              width: '100%',
+              height: '35px',
+              boxSizing: 'border-box',
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '6px',
+              padding: '2px',
+              cursor: 'pointer'
+            }}
+          />
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>

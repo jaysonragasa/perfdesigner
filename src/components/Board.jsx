@@ -426,7 +426,11 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
             const pathString = generateLinkPath(link, globalIndex, globallyOrderedLinks);
             
             return (
-              <g key={link.id} opacity={dimInactiveLayers ? (activeLayerId === link.layer ? 1 : 0.4) : 1}>
+              <g 
+                key={link.id} 
+                opacity={dimInactiveLayers ? (activeLayerId === link.layer ? 1 : 0.4) : 1}
+                style={{ pointerEvents: activeLayerId === link.layer ? 'auto' : 'none' }}
+              >
                 {link.points.length > 1 && (
                   <path 
                     d={pathString} 
@@ -443,7 +447,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                   <g
                     key={`${link.id}-${index}`}
                     transform={`translate(${p.x * SPACING}, ${p.y * SPACING})`}
-                    style={{ cursor: 'move' }}
+                    style={{ cursor: 'move', pointerEvents: activeLayerId === link.layer ? 'all' : 'none' }}
                     onContextMenu={(e) => handleNodeContextMenu(e, link.id, index)}
                     onMouseDown={(e) => handleNodeMouseDown(e, link.id, index)}
                     onClick={(e) => {
@@ -469,6 +473,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
         {layers.find(l => l.id === 'top')?.visible !== false && components.map(comp => (
           <g 
             key={comp.id}
+            opacity={dimInactiveLayers && activeLayerId !== 'top' ? 0.4 : 1}
             onMouseDown={(e) => { if (activeTool !== 'link') handleComponentMouseDown(e, comp); }}
             onClick={(e) => { if (activeTool !== 'link') e.stopPropagation(); }}
             style={{ 
