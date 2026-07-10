@@ -416,20 +416,21 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
           const globallyOrderedLinks = [];
           [...layers].reverse().forEach(layerItem => {
             if (layerItem.visible) {
-              globallyOrderedLinks.push(...links.filter(l => l.layer === layerItem.id));
+              globallyOrderedLinks.push(...links.filter(l => (l.layer || 'top') === layerItem.id));
             }
           });
           
           return globallyOrderedLinks.map((link, globalIndex) => {
             if (link.points.length === 0) return null;
-            const isBottom = link.layer === 'bottom';
+            const isBottom = (link.layer || 'top') === 'bottom';
             const pathString = generateLinkPath(link, globalIndex, globallyOrderedLinks);
+            const linkLayer = link.layer || 'top';
             
             return (
               <g 
                 key={link.id} 
-                opacity={dimInactiveLayers ? (activeLayerId === link.layer ? 1 : 0.4) : 1}
-                style={{ pointerEvents: activeLayerId === link.layer ? 'auto' : 'none' }}
+                opacity={dimInactiveLayers ? (activeLayerId === linkLayer ? 1 : 0.4) : 1}
+                style={{ pointerEvents: activeLayerId === linkLayer ? 'auto' : 'none' }}
               >
                 {link.points.length > 1 && (
                   <path 
@@ -447,7 +448,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                   <g
                     key={`${link.id}-${index}`}
                     transform={`translate(${p.x * SPACING}, ${p.y * SPACING})`}
-                    style={{ cursor: 'move', pointerEvents: activeLayerId === link.layer ? 'all' : 'none' }}
+                    style={{ cursor: 'move', pointerEvents: activeLayerId === linkLayer ? 'auto' : 'none' }}
                     onContextMenu={(e) => handleNodeContextMenu(e, link.id, index)}
                     onMouseDown={(e) => handleNodeMouseDown(e, link.id, index)}
                     onClick={(e) => {
@@ -455,7 +456,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                       onPadClick(p.x, p.y);
                     }}
                   >
-                    <circle r={12} fill="transparent" />
+                    <circle r={12} fill="transparent" style={{ pointerEvents: 'all' }} />
                     <circle
                       r={isBottom ? 6 : 4}
                       fill={isBottom ? 'var(--solder-hover)' : '#fff'}
