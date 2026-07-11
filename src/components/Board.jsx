@@ -453,7 +453,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
             return (
               <g 
                 key={link.id} 
-                opacity={dimInactiveLayers ? (activeLayerId === linkLayer ? 1 : 0.4) : 1}
+                opacity={dimInactiveLayers ? (activeLayerId === linkLayer ? 1 : 0.5) : 1}
                 style={{ pointerEvents: activeLayerId === linkLayer ? 'auto' : 'none' }}
               >
                 {link.points.length > 1 && (
@@ -498,7 +498,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
         {layers.find(l => l.id === 'top')?.visible !== false && components.map(comp => (
           <g 
             key={comp.id}
-            opacity={dimInactiveLayers && activeLayerId !== 'top' ? 0.4 : 1}
+            opacity={dimInactiveLayers && activeLayerId !== 'top' ? 0.5 : 1}
             onMouseDown={(e) => { if (activeTool !== 'link') handleComponentMouseDown(e, comp); }}
             onClick={(e) => { if (activeTool !== 'link') e.stopPropagation(); }}
             style={{ 

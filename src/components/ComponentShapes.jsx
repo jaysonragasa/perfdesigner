@@ -10,7 +10,7 @@ export const Resistor = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   const bands = params?.bands || ['#8B4513', '#000000', '#FF0000', '#FFD700'];
 
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       {/* Leads */}
       <line x1="0" y1="0" x2={length} y2="0" stroke="#silver" strokeWidth="2" />
       {/* Body */}
@@ -47,7 +47,7 @@ export const Capacitor = ({ x, y, layer, rotation = 0, params, isSelected }) => 
   const length = isLarge ? 2 * SPACING : SPACING;
   const r = isLarge ? 14 : 7;
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       <line x1="0" y1="0" x2={length} y2="0" stroke="#silver" strokeWidth="2" />
       <circle cx={length/2} cy="0" r={r} fill="#d99b28" stroke="#b07b1a" strokeWidth="1" />
       
@@ -73,7 +73,7 @@ export const Electrolytic = ({ x, y, layer, rotation = 0, params, isSelected }) 
   const length = isLarge ? 2 * SPACING : SPACING;
   const r = isLarge ? 16 : 9;
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       <line x1="0" y1="0" x2={length} y2="0" stroke="#silver" strokeWidth="2" />
       <circle cx={length/2} cy="0" r={r} fill="#1a1a1a" stroke="#404040" strokeWidth="1" />
       {/* Grey stripe on the right side (negative pin side) */}
@@ -103,7 +103,7 @@ export const LED = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   const length = 2 * SPACING;
   const color = params?.color || '#ff0000';
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       <line x1="0" y1="0" x2={length} y2="0" stroke="#silver" strokeWidth="2" />
       
       {/* 3-pin LED Body: bigger than normal */}
@@ -139,7 +139,7 @@ export const LED = ({ x, y, layer, rotation = 0, params, isSelected }) => {
 export const DIP8 = ({ x, y, layer, rotation = 0, isSelected }) => {
   // Spans 4x3 holes (pins at y and y+3, from x to x+3)
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       <rect x="-5" y="-5" width={3 * SPACING + 10} height={3 * SPACING + 10} fill="#1a1a1a" rx="2" />
       {/* Notch */}
       <path d={`M -5 ${1.5 * SPACING - 5} A 5 5 0 0 1 -5 ${1.5 * SPACING + 5}`} fill="#1a1a1a" stroke="#404040" strokeWidth="1"/>
@@ -158,7 +158,7 @@ export const Header = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   const pins = params?.pins || 4;
   const baseColor = params?.baseColor || '#2a2a2a';
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       <rect x="-5" y="-7" width={(pins - 1) * SPACING + 10} height="14" fill={baseColor} rx="1" />
       {Array.from({ length: pins }).map((_, i) => (
         <rect key={i} x={i * SPACING - 4} y="-4" width="8" height="8" fill="#d4af37" />
@@ -178,7 +178,7 @@ export const MaleHeader = ({ x, y, layer, rotation = 0, params, isSelected }) =>
   const baseColor = params?.baseColor || '#111111';
   
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       <rect x="-5" y="-7" width={(pins - 1) * SPACING + 10} height="14" fill={baseColor} rx="1" />
       {Array.from({ length: pins }).map((_, i) => (
         <rect key={i} x={i * SPACING - 3} y="-3" width="6" height="6" fill="#d4af37" />
@@ -222,7 +222,7 @@ export const CustomShape = ({ x, y, layer, rotation = 0, def, isSelected, custom
   const rectY = padCenterY - (bodyHeightPx / 2);
 
   return (
-    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
+    <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`}>
       {/* Custom IC Body */}
       {!def.hideBody && (
         <rect 
