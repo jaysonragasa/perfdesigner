@@ -3,7 +3,7 @@ import { renderComponent } from './ComponentShapes';
 import { RotateCw, Edit2, Trash2 } from 'lucide-react';
 
 const SPACING = 20; // SVG units between holes
-const PAD_OUTER = 14;
+const PAD_OUTER = 12;
 const PAD_INNER = 6;
 
 // Finds intersection between segment (A, B) and (C, D)
