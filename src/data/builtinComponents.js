@@ -251,5 +251,63 @@ export const BUILTIN_JSON_COMPONENTS = [
         { "text": "ESP32 DEVKIT V1", "size": 16, "x": 5.0339851997742535, "y": 1.3095668544049073 }
       ]
     }
+  },
+  {
+    "id": "pam8406",
+    "categoryId": "audio",
+    "categoryName": "Audio",
+    "name": "PAM8406 Audio Ampli",
+    "icon": "🔊",
+    "def": {
+      "name": "PAM8406 AUDIO AMPLI",
+      "bodyWidth_mm": 23,
+      "bodyHeight_mm": 24,
+      "hideBody": false,
+      "pads": [
+        { "x": 8, "y": 1 },
+        { "x": 8, "y": 2 },
+        { "x": 0, "y": 3 },
+        { "x": 8, "y": 3 },
+        { "x": 0, "y": 4 },
+        { "x": 8, "y": 4 },
+        { "x": 0, "y": 5 },
+        { "x": 8, "y": 5 },
+        { "x": 8, "y": 6 }
+      ],
+      "texts": [
+        { "text": "VCC", "size": 11, "x": 6.967551058065119, "y": 1.039554556262394 },
+        { "text": "GND", "size": 11, "x": 6.965885715758748, "y": 2.0127330488495154 },
+        { "text": "ROUT+", "size": 11, "x": 6.690465022723642, "y": 2.9864686558232854 },
+        { "text": "ROUT-", "size": 11, "x": 6.672037180102247, "y": 4 },
+        { "text": "LOUT+", "size": 11, "x": 6.708892865345037, "y": 4.976675658933925 },
+        { "text": "LOUT-", "size": 11, "x": 6.690465022723643, "y": 6.063918373596218 },
+        { "text": "RIN", "size": 11, "x": 0.8856945969842769, "y": 2.9680408132018905 },
+        { "text": "GND", "size": 11, "x": 0.9778338100912509, "y": 4 },
+        { "text": "LIN", "size": 11, "x": 0.8119832264986977, "y": 5.03195918679811 },
+        { "text": "PAM8406", "size": 16, "x": 4.028086941962194, "y": 7.39851997742535 }
+      ]
+    }
+  },
+  {
+    "id": "speaker",
+    "categoryId": "audio",
+    "categoryName": "Audio",
+    "name": "Speaker",
+    "icon": "📣",
+    "def": {
+      "name": "SPEAKER",
+      "bodyWidth_mm": 25,
+      "bodyHeight_mm": 25,
+      "hideBody": false,
+      "pads": [
+        { "x": 4, "y": 9 },
+        { "x": 5, "y": 9 }
+      ],
+      "texts": [
+        { "text": "SPEAKER", "size": 25, "x": 4.5, "y": 4.5 },
+        { "text": "+", "size": 25, "x": 3.9722168753997185, "y": 7.884021210672394 },
+        { "text": "_", "size": 25, "x": 4.9346449261414085, "y": 7.511468416836902 }
+      ]
+    }
   }
 ];
