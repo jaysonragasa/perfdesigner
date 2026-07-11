@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import ComponentCreator from './components/ComponentCreator';
 import BoardSettings from './components/BoardSettings';
 import ComponentParamsModal from './components/ComponentParamsModal';
+import ResistorBuilderModal from './components/ResistorBuilderModal';
 
 import LayersPanel from './components/LayersPanel';
 
@@ -64,7 +65,7 @@ function App() {
       let compHeight = null;
       if (selectedComponentType === 'capacitor' || selectedComponentType === 'electrolytic') {
         compWidth = (pendingComponentParams && pendingComponentParams.uF >= 1000) ? 2 : 1;
-      } else if (selectedComponentType.startsWith('custom_')) {
+      } else if (selectedComponentType.startsWith('custom_') || selectedComponentType.startsWith('saved_resistor_')) {
         const def = customComponents.find(c => c.id === selectedComponentType);
         if (def) {
           compWidth = def.bodyWidth !== undefined ? def.bodyWidth : def.width;
@@ -80,7 +81,9 @@ function App() {
         rotation: 0,
         width: compWidth,
         height: compHeight,
-        params: pendingComponentParams || null
+        params: selectedComponentType.startsWith('saved_resistor_') 
+                 ? customComponents.find(c => c.id === selectedComponentType)?.params 
+                 : (pendingComponentParams || null)
       };
       setComponents([...components, newComponent]);
     } else if (activeTool === 'link') {
@@ -345,7 +348,7 @@ function App() {
             boardColor={boardColor}
             setBoardColor={setBoardColor}
           />}
-      {showComponentParams && (
+      {showComponentParams && showComponentParams.type !== 'resistor' && (
         <ComponentParamsModal
           componentType={showComponentParams.type}
           initialParams={showComponentParams.params || {}}
@@ -359,6 +362,41 @@ function App() {
                     compWidth = (params && params.uF >= 1000) ? 2 : 1;
                   }
                   return { ...c, params, width: compWidth };
+                }
+                return c;
+              }));
+            } else {
+              setPendingComponentParams(params);
+              setSelectedComponentType(showComponentParams.type);
+              setActiveTool('component');
+            }
+            setShowComponentParams(null);
+          }}
+        />
+      )}
+      {showComponentParams && showComponentParams.type === 'resistor' && (
+        <ResistorBuilderModal
+          initialParams={showComponentParams.params || {}}
+          onClose={() => setShowComponentParams(null)}
+          onSaveToLibrary={(params) => {
+            const newComp = {
+              id: `saved_resistor_${Date.now()}`,
+              type: `saved_resistor_${Date.now()}`,
+              baseType: 'resistor',
+              category: 'Saved Resistors',
+              name: `Resistor ${params.valueText}`,
+              params,
+              width: 4,
+              height: 1
+            };
+            setCustomComponents(prev => [...prev, newComp]);
+            setShowComponentParams(null);
+          }}
+          onSave={(params) => {
+            if (showComponentParams.editingId) {
+              setComponents(components.map(c => {
+                if (c.id === showComponentParams.editingId) {
+                  return { ...c, params };
                 }
                 return c;
               }));

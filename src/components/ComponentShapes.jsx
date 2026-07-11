@@ -3,21 +3,30 @@ import { BUILTIN_JSON_COMPONENTS } from '../data/builtinComponents';
 
 const SPACING = 20;
 
-export const Resistor = ({ x, y, layer, rotation = 0 }) => {
+export const Resistor = ({ x, y, layer, rotation = 0, params }) => {
   // Assuming a horizontal resistor spanning 3 holes (4 pins total length but body in middle)
-  // Let's say pin 1 is at (x,y), pin 2 is at (x+4, y).
   const length = 4 * SPACING;
+  const numBands = params?.numBands || 4;
+  const bands = params?.bands || ['#8B4513', '#000000', '#FF0000', '#FFD700'];
+
   return (
     <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
       {/* Leads */}
       <line x1="0" y1="0" x2={length} y2="0" stroke="#silver" strokeWidth="2" />
       {/* Body */}
       <rect x={length/2 - 15} y="-8" width="30" height="16" fill="#e3c498" rx="4" stroke="#c29b6a" strokeWidth="1" />
+      
       {/* Bands */}
-      <rect x={length/2 - 10} y="-8" width="3" height="16" fill="#cc2929" />
-      <rect x={length/2 - 5} y="-8" width="3" height="16" fill="#29cc29" />
-      <rect x={length/2 + 2} y="-8" width="3" height="16" fill="#000" />
-      <rect x={length/2 + 8} y="-8" width="3" height="16" fill="#cca300" />
+      {bands.slice(0, numBands).map((hex, i) => {
+        const spacing = 30 / (numBands + 1);
+        const xPos = (length / 2 - 15) + spacing * (i + 1);
+        return <rect key={i} x={xPos - 1.5} y="-8" width="3" height="16" fill={hex} />
+      })}
+
+      {/* Value Text */}
+      {params?.valueText && (
+        <text x={length/2} y="-12" fill="white" fontSize="10" textAnchor="middle">{params.valueText}</text>
+      )}
       
       {/* Pins */}
       <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
@@ -193,6 +202,10 @@ export const renderComponent = (comp, layer, customComponents = []) => {
   if (comp.type.startsWith('custom_')) {
     const def = customComponents.find(c => c.id === comp.type);
     return <CustomShape {...props} def={def} />;
+  }
+
+  if (comp.type.startsWith('saved_resistor_')) {
+    return <Resistor {...props} />;
   }
 
   switch (comp.type) {
