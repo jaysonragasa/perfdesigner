@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { BUILTIN_JSON_COMPONENTS } from '../data/builtinComponents';
 
 const CATEGORIES = [
   {
@@ -21,11 +22,24 @@ const CATEGORIES = [
   {
     name: 'Connectors',
     items: [
-      { id: 'header4', name: 'Female Header (4-pin)', icon: 'H' },
+      { id: 'header4', name: 'Female Header', icon: 'H' },
       { id: 'male_header', name: 'Male Header', icon: 'M' },
     ]
   }
 ];
+
+// Dynamically inject JSON-based builtin components into CATEGORIES
+BUILTIN_JSON_COMPONENTS.forEach(comp => {
+  let cat = CATEGORIES.find(c => c.name === comp.categoryName);
+  if (!cat) {
+    cat = { name: comp.categoryName, items: [] };
+    CATEGORIES.push(cat);
+  }
+  // Avoid duplicates if React HMR re-runs this
+  if (!cat.items.find(i => i.id === comp.id)) {
+    cat.items.push({ id: comp.id, name: comp.name, icon: comp.icon });
+  }
+});
 
 const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelectedComponentType, customComponents = [], setShowComponentParams, setPendingComponentParams, onImportComponents, onDeleteCustomComponent }) => {
   
@@ -99,7 +113,7 @@ const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelected
                       <div 
                         style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}
                         onClick={() => {
-                          if (comp.id === 'capacitor' || comp.id === 'electrolytic' || comp.id === 'male_header') {
+                          if (comp.id === 'capacitor' || comp.id === 'electrolytic' || comp.id === 'male_header' || comp.id === 'header4') {
                             if (setShowComponentParams) setShowComponentParams({ type: comp.id });
                           } else {
                             setSelectedComponentType(comp.id);

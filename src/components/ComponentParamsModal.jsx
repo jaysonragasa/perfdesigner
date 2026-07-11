@@ -7,7 +7,7 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
   const [voltage, setVoltage] = useState(initialParams.voltage || 25);
   
   const [pins, setPins] = useState(initialParams.pins || 4);
-  const [baseColor, setBaseColor] = useState(initialParams.baseColor || '#111111');
+  const [baseColor, setBaseColor] = useState(initialParams.baseColor || (componentType === 'header4' ? '#2a2a2a' : '#111111'));
   
   // Dragging logic
   const [isDragging, setIsDragging] = useState(false);
@@ -47,13 +47,13 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
   const handleSave = () => {
     if (isCapacitor) {
       onSave({ uF, voltage });
-    } else if (isMaleHeader) {
+    } else if (isHeader) {
       onSave({ pins, baseColor });
     }
   };
 
   const isCapacitor = componentType === 'capacitor' || componentType === 'electrolytic';
-  const isMaleHeader = componentType === 'male_header';
+  const isHeader = componentType === 'male_header' || componentType === 'header4';
 
   return (
     <div 
@@ -115,7 +115,7 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
             </div>
           </div>
         )}
-        {isMaleHeader && (
+        {isHeader && (
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Number of Pins</label>

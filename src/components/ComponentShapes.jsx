@@ -1,4 +1,5 @@
 import React from 'react';
+import { BUILTIN_JSON_COMPONENTS } from '../data/builtinComponents';
 
 const SPACING = 20;
 
@@ -99,15 +100,15 @@ export const DIP8 = ({ x, y, layer, rotation = 0 }) => {
   );
 };
 
-export const Header = ({ x, y, layer, rotation = 0 }) => {
-  // 4 pins straight
+export const Header = ({ x, y, layer, rotation = 0, params }) => {
+  const pins = params?.pins || 4;
+  const baseColor = params?.baseColor || '#2a2a2a';
   return (
     <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
-      <rect x="-5" y="-5" width={3 * SPACING + 10} height="10" fill="#2a2a2a" />
-      <rect x="-4" y="-4" width="8" height="8" fill="#gold" />
-      <rect x={SPACING-4} y="-4" width="8" height="8" fill="#gold" />
-      <rect x={2*SPACING-4} y="-4" width="8" height="8" fill="#gold" />
-      <rect x={3*SPACING-4} y="-4" width="8" height="8" fill="#gold" />
+      <rect x="-5" y="-7" width={(pins - 1) * SPACING + 10} height="14" fill={baseColor} rx="1" />
+      {Array.from({ length: pins }).map((_, i) => (
+        <rect key={i} x={i * SPACING - 4} y="-4" width="8" height="8" fill="#d4af37" />
+      ))}
     </g>
   );
 };
@@ -129,14 +130,27 @@ export const MaleHeader = ({ x, y, layer, rotation = 0, params }) => {
 export const CustomShape = ({ x, y, layer, rotation = 0, def }) => {
   if (!def) return null;
 
-  const bWidth = def.bodyWidth !== undefined ? def.bodyWidth : def.width;
-  const bHeight = def.bodyHeight !== undefined ? def.bodyHeight : def.height;
+  // Fallback for missing width/height by finding pad bounds
+  const padXs = def.pads.map(p => p.x);
+  const padYs = def.pads.map(p => p.y);
+  const minX = padXs.length > 0 ? Math.min(...padXs) : 0;
+  const maxX = padXs.length > 0 ? Math.max(...padXs) : 0;
+  const minY = padYs.length > 0 ? Math.min(...padYs) : 0;
+  const maxY = padYs.length > 0 ? Math.max(...padYs) : 0;
+
+  const bWidth = def.bodyWidth !== undefined ? def.bodyWidth : (def.bodyWidth_mm !== undefined ? def.bodyWidth_mm / 2.54 : (def.width || (maxX - minX + 1)));
+  const bHeight = def.bodyHeight !== undefined ? def.bodyHeight : (def.bodyHeight_mm !== undefined ? def.bodyHeight_mm / 2.54 : (def.height || (maxY - minY + 1)));
   
   const bodyWidthPx = bWidth * SPACING;
   const bodyHeightPx = bHeight * SPACING;
   
-  const padCenterX = ((def.width - 1) * SPACING) / 2;
-  const padCenterY = ((def.height - 1) * SPACING) / 2;
+  // Mimic how ComponentCreator defines grid cols/rows from mm dimensions during import
+  const compGridWidth = def.width !== undefined ? def.width : (def.bodyWidth_mm !== undefined ? Math.max(1, Math.round(def.bodyWidth_mm / 2.54)) : (maxX - minX + 1));
+  const compGridHeight = def.height !== undefined ? def.height : (def.bodyHeight_mm !== undefined ? Math.max(1, Math.round(def.bodyHeight_mm / 2.54)) : (maxY - minY + 1));
+
+  // If we have no center defined by grid size, fallback to pad bounds (which we now replaced by compGridWidth/Height)
+  const padCenterX = ((compGridWidth - 1) * SPACING) / 2;
+  const padCenterY = ((compGridHeight - 1) * SPACING) / 2;
   
   const rectX = padCenterX - (bodyWidthPx / 2);
   const rectY = padCenterY - (bodyHeightPx / 2);
@@ -190,6 +204,9 @@ export const renderComponent = (comp, layer, customComponents = []) => {
     case 'dip16': return <DIP8 {...props} />; // Placeholder for dip16
     case 'header4': return <Header {...props} />;
     case 'male_header': return <MaleHeader {...props} />;
-    default: return null;
+    default: 
+      const builtin = BUILTIN_JSON_COMPONENTS.find(c => c.id === comp.type);
+      if (builtin) return <CustomShape {...props} def={builtin.def} />;
+      return null;
   }
 };
