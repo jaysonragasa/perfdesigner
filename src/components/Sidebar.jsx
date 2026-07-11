@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronRight, Download } from 'lucide-react';
 import { BUILTIN_JSON_COMPONENTS } from '../data/builtinComponents';
 
 const CATEGORIES = [
@@ -44,7 +44,7 @@ BUILTIN_JSON_COMPONENTS.forEach(comp => {
 const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelectedComponentType, customComponents = [], setShowComponentParams, setPendingComponentParams, onImportComponents, onDeleteCustomComponent }) => {
   
   const allCategories = [...CATEGORIES];
-  const visibleCustomComps = customComponents.filter(c => !c.deleted);
+  const visibleCustomComps = customComponents.filter(c => !c.deleted && !c.isHidden);
   if (visibleCustomComps.length > 0) {
     allCategories.push({
       name: 'Custom',
@@ -128,15 +128,54 @@ const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelected
                         <span style={{ fontSize: '14px', fontWeight: '500' }}>{comp.name}</span>
                       </div>
                       {comp.isCustom && onDeleteCustomComponent && (
-                        <div 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteCustomComponent(comp.id);
-                          }}
-                          style={{ color: 'var(--text-muted)', display: 'flex', padding: '4px' }}
-                          title="Delete Component"
-                        >
-                          <Trash2 size={16} />
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          <div 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const customComp = customComponents.find(c => c.id === comp.id);
+                              if (customComp) {
+                                const data = { ...customComp };
+                                
+                                // Compute dependencies just like ComponentCreator
+                                const dependencies = [];
+                                if (data.childComponents && data.childComponents.length > 0) {
+                                  data.childComponents.forEach(child => {
+                                     if (child.type.startsWith('custom_') || child.type.startsWith('saved_resistor_')) {
+                                        const def = customComponents.find(c => c.id === child.type);
+                                        if (def && !dependencies.find(d => d.id === def.id)) {
+                                           dependencies.push(def);
+                                        }
+                                     }
+                                  });
+                                }
+                                if (dependencies.length > 0) {
+                                  data.dependencies = dependencies;
+                                }
+
+                                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `${data.name.replace(/\s+/g, '_')}_component.json`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              }
+                            }}
+                            style={{ color: 'var(--text-muted)', display: 'flex', padding: '4px' }}
+                            title="Export Component"
+                          >
+                            <Download size={16} />
+                          </div>
+                          <div 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteCustomComponent(comp.id);
+                            }}
+                            style={{ color: 'var(--text-muted)', display: 'flex', padding: '4px' }}
+                            title="Delete Component"
+                          >
+                            <Trash2 size={16} />
+                          </div>
                         </div>
                       )}
                     </div>

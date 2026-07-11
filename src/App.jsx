@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import Board from './components/Board';
+import Board, { getComponentPads } from './components/Board';
 import Toolbar from './components/Toolbar';
 import Sidebar from './components/Sidebar';
 import ComponentCreator from './components/ComponentCreator';
 import BoardSettings from './components/BoardSettings';
 import ComponentParamsModal from './components/ComponentParamsModal';
 import ResistorBuilderModal from './components/ResistorBuilderModal';
+import MacroBuilderModal from './components/MacroBuilderModal';
 
 import LayersPanel from './components/LayersPanel';
 
@@ -25,6 +26,7 @@ function App() {
   const [showBoardSettings, setShowBoardSettings] = useState(false);
   const [showComponentParams, setShowComponentParams] = useState(null);
   const [pendingComponentParams, setPendingComponentParams] = useState(null);
+  const [showMacroBuilder, setShowMacroBuilder] = useState(null);
   const [customComponents, setCustomComponents] = useState([]);
   const [wireColor, setWireColor] = useState('#10b981'); // Default to green wire
   
@@ -186,7 +188,31 @@ function App() {
         try {
           const data = JSON.parse(event.target.result);
           if (data.name && data.pads) {
-            data.id = `custom_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+            const idMap = {};
+            const originalId = data.id || `custom_${Math.random()}`;
+            const newId = `custom_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+            idMap[originalId] = newId;
+            data.id = newId;
+            
+            if (data.dependencies && Array.isArray(data.dependencies)) {
+               data.dependencies.forEach((dep, index) => {
+                  const newDepId = `custom_${Date.now()}_dep${index}_${Math.floor(Math.random() * 10000)}`;
+                  idMap[dep.id] = newDepId;
+                  dep.id = newDepId;
+                  dep.type = 'custom';
+                  dep.category = 'Imported Dependencies';
+                  dep.isHidden = true;
+                  newComps.push(dep);
+               });
+            }
+            
+            if (data.childComponents && Array.isArray(data.childComponents)) {
+               data.childComponents.forEach(child => {
+                  if (idMap[child.type]) {
+                     child.type = idMap[child.type];
+                  }
+               });
+            }
             
             // Migrate legacy labels to texts on bulk import too!
             if (!data.texts) data.texts = [];
@@ -297,6 +323,9 @@ function App() {
             onPadClick={handlePadClick}
             activeTool={activeTool}
             customComponents={customComponents}
+            onGroupComponents={(selectedIds) => {
+               setShowMacroBuilder(selectedIds);
+            }}
             transform={boardTransform}
             setTransform={setBoardTransform}
             onEditComponent={(compId) => {
@@ -320,6 +349,21 @@ function App() {
       {showComponentCreator && (
         <ComponentCreator 
           editingDef={typeof showComponentCreator === 'object' ? showComponentCreator : null}
+          customComponents={customComponents}
+          onImportDependencies={(deps) => {
+             const idMap = {};
+             const newDeps = [];
+             deps.forEach((dep, index) => {
+                const newDepId = `custom_${Date.now()}_dep${index}_${Math.floor(Math.random() * 10000)}`;
+                idMap[dep.id] = newDepId;
+                dep.id = newDepId;
+                dep.type = 'custom';
+                dep.category = 'Imported Dependencies';
+                newDeps.push(dep);
+             });
+             setCustomComponents(prev => [...prev, ...newDeps]);
+             return idMap; // return the idMap so ComponentCreator can remap childComponents!
+          }}
           onClose={() => setShowComponentCreator(false)}
           onSave={(comp) => {
             if (typeof showComponentCreator === 'object') {
@@ -406,6 +450,127 @@ function App() {
               setActiveTool('component');
             }
             setShowComponentParams(null);
+          }}
+        />
+      )}
+      {showMacroBuilder && (
+        <MacroBuilderModal 
+          onClose={() => setShowMacroBuilder(null)}
+          onSave={(name) => {
+             const selectedComps = components.filter(c => showMacroBuilder.includes(c.id));
+             if (selectedComps.length === 0) {
+               setShowMacroBuilder(null);
+               return;
+             }
+
+             const allGlobalPads = [];
+             selectedComps.forEach(comp => {
+                const globalPads = getComponentPads(comp, customComponents);
+                allGlobalPads.push(...globalPads);
+             });
+             
+             if (allGlobalPads.length === 0) {
+               setShowMacroBuilder(null);
+               return;
+             }
+
+             // Compute bounds based on all pads
+             const padMinX = Math.min(...allGlobalPads.map(p => p.x));
+             const padMinY = Math.min(...allGlobalPads.map(p => p.y));
+             const padMaxX = Math.max(...allGlobalPads.map(p => p.x));
+             const padMaxY = Math.max(...allGlobalPads.map(p => p.y));
+
+             // Also consider the original component coordinates to ensure we don't clip bodies that extend past pads
+             const minX = Math.min(padMinX, ...selectedComps.map(c => c.x));
+             const minY = Math.min(padMinY, ...selectedComps.map(c => c.y));
+             
+             // For max bounds, guess based on type if needed
+             const compMaxX = Math.max(...selectedComps.map(c => {
+                 let w = c.width;
+                 if (c.type.startsWith('custom_')) {
+                    const def = customComponents.find(d => d.id === c.type);
+                    if (def) {
+                       w = def.bodyWidth !== undefined ? def.bodyWidth : (def.bodyWidth_mm !== undefined ? def.bodyWidth_mm / 2.54 : def.width);
+                    }
+                 }
+                 if (!w) {
+                    if (c.type === 'resistor') w = 4;
+                    else if (c.type === 'capacitor' || c.type === 'electrolytic') w = 1;
+                    else if (c.type === 'male_header' || c.type === 'header4') {
+                       w = c.params?.pins || 4;
+                       if (c.rotation === 90 || c.rotation === 270) w = 1;
+                    }
+                    else w = 2; // tight fallback
+                 }
+                 return c.x + (w - 1);
+             }));
+             const compMaxY = Math.max(...selectedComps.map(c => {
+                 let h = c.height;
+                 if (c.type.startsWith('custom_')) {
+                    const def = customComponents.find(d => d.id === c.type);
+                    if (def) {
+                       h = def.bodyHeight !== undefined ? def.bodyHeight : (def.bodyHeight_mm !== undefined ? def.bodyHeight_mm / 2.54 : def.height);
+                    }
+                 }
+                 if (!h) {
+                    if (c.type === 'resistor') h = 1;
+                    else if (c.type === 'capacitor' || c.type === 'electrolytic') h = 1;
+                    else if (c.type === 'male_header' || c.type === 'header4') {
+                       h = 1;
+                       if (c.rotation === 90 || c.rotation === 270) h = c.params?.pins || 4;
+                    }
+                    else h = 2;
+                 }
+                 return c.y + (h - 1);
+             }));
+
+             const maxX = Math.max(padMaxX, compMaxX);
+             const maxY = Math.max(padMaxY, compMaxY);
+             
+             const width = maxX - minX + 1;
+             const height = maxY - minY + 1;
+
+             // Extract pads from all child components relative to the new macro's coordinate system
+             const allPads = allGlobalPads.map(p => ({ x: p.x - minX, y: p.y - minY }));
+
+             // Create child components relative to macro
+             const childComponents = selectedComps.map(comp => ({
+                ...comp,
+                x: comp.x - minX,
+                y: comp.y - minY
+             }));
+
+             const newMacro = {
+                id: `custom_${Date.now()}`,
+                name: name,
+                category: 'Custom Macros',
+                type: 'custom',
+                hideBody: true,
+                pads: allPads,
+                width: width,
+                height: height,
+                bodyWidth: width,
+                bodyHeight: height,
+                childComponents: childComponents
+             };
+
+             setCustomComponents(prev => [...prev, newMacro]);
+             
+             // Replace individual components with the single new macro
+             setComponents(prev => [
+                ...prev.filter(c => !showMacroBuilder.includes(c.id)),
+                {
+                   id: `comp_${Date.now()}`,
+                   type: newMacro.id,
+                   x: minX,
+                   y: minY,
+                   rotation: 0,
+                   width: width,
+                   height: height
+                }
+             ]);
+
+             setShowMacroBuilder(null);
           }}
         />
       )}

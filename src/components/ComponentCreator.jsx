@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, Download, Upload, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, Save, Download, Upload } from 'lucide-react';
+import NumberInput from './NumberInput';
+import { renderComponent } from './ComponentShapes';
 
-const ComponentCreator = ({ onClose, onSave, editingDef }) => {
+const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], onImportDependencies }) => {
   const [name, setName] = useState(editingDef ? editingDef.name : 'My Custom IC');
   const [rows, setRows] = useState(editingDef ? editingDef.height : 3);
   const [cols, setCols] = useState(editingDef ? editingDef.width : 4);
@@ -21,6 +23,7 @@ const ComponentCreator = ({ onClose, onSave, editingDef }) => {
   const [newFontSize, setNewFontSize] = useState(25);
   const [selectedTextIndex, setSelectedTextIndex] = useState(null);
   const [zoom, setZoom] = useState(1);
+  const [childComponents, setChildComponents] = useState(editingDef ? (editingDef.childComponents || []) : []);
   
   useEffect(() => {
     const computedCols = Math.max(1, Math.round(bodyWidth / 2.54));
@@ -195,7 +198,9 @@ const ComponentCreator = ({ onClose, onSave, editingDef }) => {
       bodyHeight: Math.min(100, bodyHeight / 2.54),
       bodyWidth_mm: bodyWidth,
       bodyHeight_mm: bodyHeight,
-      texts
+      hideBody: editingDef?.hideBody || false,
+      texts,
+      childComponents: childComponents.length > 0 ? childComponents : undefined
     });
   };
 
@@ -206,12 +211,27 @@ const ComponentCreator = ({ onClose, onSave, editingDef }) => {
         if (grid[r][c]) activePads.push({ x: c, y: r });
       }
     }
+    const dependencies = [];
+    if (childComponents && childComponents.length > 0) {
+      childComponents.forEach(child => {
+         if (child.type.startsWith('custom_') || child.type.startsWith('saved_resistor_')) {
+            const def = customComponents.find(c => c.id === child.type);
+            if (def && !dependencies.find(d => d.id === def.id)) {
+               dependencies.push(def);
+            }
+         }
+      });
+    }
+
     const data = {
       name,
       bodyWidth_mm: bodyWidth,
       bodyHeight_mm: bodyHeight,
+      hideBody: editingDef?.hideBody || false,
       pads: activePads,
-      texts
+      texts,
+      childComponents: childComponents.length > 0 ? childComponents : undefined,
+      dependencies: dependencies.length > 0 ? dependencies : undefined
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -238,6 +258,23 @@ const ComponentCreator = ({ onClose, onSave, editingDef }) => {
            importedTexts.push({ text: data.label, x: data.labelPos?.x || 2, y: data.labelPos?.y || 1.5, size: 12 });
         }
         setTexts(importedTexts);
+        
+        if (data.dependencies && Array.isArray(data.dependencies) && onImportDependencies) {
+           const idMap = onImportDependencies(data.dependencies);
+           if (data.childComponents && Array.isArray(data.childComponents)) {
+              data.childComponents.forEach(child => {
+                 if (idMap[child.type]) {
+                    child.type = idMap[child.type];
+                 }
+              });
+           }
+        }
+        
+        if (data.childComponents) {
+           setChildComponents(data.childComponents);
+        } else {
+           setChildComponents([]);
+        }
         
         if (data.pads && Array.isArray(data.pads)) {
            const newCols = Math.max(1, Math.round((data.bodyWidth_mm || 10.16) / 2.54));
@@ -301,22 +338,18 @@ const ComponentCreator = ({ onClose, onSave, editingDef }) => {
         <div style={{ display: 'flex', gap: '12px' }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Grid Rows</label>
-            <input 
-              type="number" 
-              min="1" max="20"
+            <NumberInput 
+              min={1} max={20}
               value={rows} 
-              onChange={e => setRows(parseInt(e.target.value) || 1)}
-              style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', padding: '8px', color: 'white', borderRadius: '4px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+              onChange={val => setRows(val || 1)}
             />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Grid Columns</label>
-            <input 
-              type="number" 
-              min="1" max="20"
+            <NumberInput 
+              min={1} max={20}
               value={cols} 
-              onChange={e => setCols(parseInt(e.target.value) || 1)}
-              style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', padding: '8px', color: 'white', borderRadius: '4px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+              onChange={val => setCols(val || 1)}
             />
           </div>
         </div>
@@ -324,22 +357,18 @@ const ComponentCreator = ({ onClose, onSave, editingDef }) => {
         <div style={{ display: 'flex', gap: '12px' }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Body Height (mm)</label>
-            <input 
-              type="number" 
-              step="0.1" min="1" max="100"
+            <NumberInput 
+              step={0.1} min={1} max={100}
               value={bodyHeight} 
-              onChange={e => setBodyHeight(parseFloat(e.target.value) || 1)}
-              style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', padding: '8px', color: 'white', borderRadius: '4px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+              onChange={val => setBodyHeight(val || 1)}
             />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Body Width (mm)</label>
-            <input 
-              type="number" 
-              step="0.1" min="1" max="100"
+            <NumberInput 
+              step={0.1} min={1} max={100}
               value={bodyWidth} 
-              onChange={e => setBodyWidth(parseFloat(e.target.value) || 1)}
-              style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', padding: '8px', color: 'white', borderRadius: '4px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+              onChange={val => setBodyWidth(val || 1)}
             />
           </div>
         </div>
@@ -417,16 +446,25 @@ const ComponentCreator = ({ onClose, onSave, editingDef }) => {
             >
               <g transform={`scale(${zoom}) translate(10, 10)`}>
                 {/* Draw component body background */}
-                <rect 
-                  x={((cols - 1) * 20) / 2 - ((bodyWidth / 2.54) * 20) / 2} 
-                  y={((rows - 1) * 20) / 2 - ((bodyHeight / 2.54) * 20) / 2} 
-                  width={(bodyWidth / 2.54) * 20} 
-                  height={(bodyHeight / 2.54) * 20} 
-                  fill="#1a1a1a" 
-                  rx="2" 
-                  stroke="#404040" 
-                  strokeWidth="1" 
-                />
+                {!(editingDef?.hideBody) && (
+                  <rect 
+                    x={((cols - 1) * 20) / 2 - ((bodyWidth / 2.54) * 20) / 2} 
+                    y={((rows - 1) * 20) / 2 - ((bodyHeight / 2.54) * 20) / 2} 
+                    width={(bodyWidth / 2.54) * 20} 
+                    height={(bodyHeight / 2.54) * 20} 
+                    fill="#1a1a1a" 
+                    rx="2" 
+                    stroke="#404040" 
+                    strokeWidth="1" 
+                  />
+                )}
+                
+                {/* Render child components */}
+                {childComponents.map((child, i) => (
+                  <React.Fragment key={`child-${child.id || i}`}>
+                    {renderComponent(child, 'top', customComponents, false)}
+                  </React.Fragment>
+                ))}
                 
                 {/* Draw pads */}
                 {grid.map((row, r) => (

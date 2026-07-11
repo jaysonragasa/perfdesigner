@@ -104,7 +104,7 @@ function generateLinkPath(link, index, allLinks) {
   return d;
 }
 
-function getComponentPads(comp, customComponents = []) {
+export function getComponentPads(comp, customComponents = []) {
   let localPads = [];
   if (comp.type.startsWith('custom_')) {
     const def = customComponents.find(c => c.id === comp.type);
@@ -121,8 +121,11 @@ function getComponentPads(comp, customComponents = []) {
       localPads.push({x: i, y: 0});
       localPads.push({x: i, y: 3});
     }
-  } else if (comp.type === 'header4') {
-    localPads = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}, {x: 3, y: 0}];
+  } else if (comp.type === 'header4' || comp.type === 'male_header') {
+    const pins = comp.params?.pins || 4;
+    for (let i=0; i<pins; i++) {
+      localPads.push({x: i, y: 0});
+    }
   }
 
   const rad = (comp.rotation || 0) * Math.PI / 180;
@@ -135,14 +138,14 @@ function getComponentPads(comp, customComponents = []) {
   }));
 }
 
-const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, transform, setTransform }) => {
+const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, transform, setTransform }) => {
   const svgRef = useRef(null);
   
   // Pan and Zoom state
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const [selectedComponentId, setSelectedComponentId] = useState(null);
+  const [selectedComponentIds, setSelectedComponentIds] = useState([]);
   const [draggedComponent, setDraggedComponent] = useState(null);
   const [draggedComponentStartPos, setDraggedComponentStartPos] = useState(null);
   const [dragStartLinks, setDragStartLinks] = useState(null);
@@ -182,10 +185,23 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
   }, [transform]);
 
   useEffect(() => {
-    const handleClick = () => setSelectedComponentId(null);
+    const handleClick = () => setSelectedComponentIds([]);
     window.addEventListener('click', handleClick);
     return () => window.removeEventListener('click', handleClick);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault();
+        if (selectedComponentIds.length > 0 && onGroupComponents) {
+          onGroupComponents(selectedComponentIds);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedComponentIds, onGroupComponents]);
 
   const handleMouseDown = (e) => {
     if (activeTool === 'select' || e.button === 1 || activeTool === 'component' || activeTool === 'link') {
@@ -312,7 +328,15 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     e.stopPropagation();
     
     // Select the component
-    setSelectedComponentId(comp.id);
+    if (e.shiftKey) {
+       setSelectedComponentIds(prev => 
+         prev.includes(comp.id) ? prev.filter(id => id !== comp.id) : [...prev, comp.id]
+       );
+    } else {
+       if (!selectedComponentIds.includes(comp.id)) {
+          setSelectedComponentIds([comp.id]);
+       }
+    }
     
     // Compute offset so the component doesn't jump to the top-left
     const svg = svgRef.current;
@@ -350,7 +374,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     <>
       <svg 
         ref={svgRef}
-      style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : (activeTool === 'select' ? 'grab' : 'crosshair') }}
+      style={{ width: '100%', height: '100%', userSelect: 'none', cursor: isDragging ? 'grabbing' : (activeTool === 'select' ? 'grab' : 'crosshair') }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -482,17 +506,15 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
               pointerEvents: activeTool === 'link' ? 'none' : 'auto'
             }}
           >
-            {renderComponent(comp, activeLayerId, customComponents)}
-            
-            {/* Highlight Selected Component Removed as requested */}
+            {renderComponent(comp, activeLayerId, customComponents, selectedComponentIds.includes(comp.id))}
           </g>
         ))}
       </g>
     </svg>
       
     {/* HTML Floating Selection Toolbar */}
-      {selectedComponentId && (() => {
-        const selectedComp = components.find(c => c.id === selectedComponentId);
+      {selectedComponentIds.length === 1 && (() => {
+        const selectedComp = components.find(c => c.id === selectedComponentIds[0]);
         if (!selectedComp) return null;
         
         // Calculate screen coordinates
@@ -527,7 +549,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
               title="Rotate 90°"
               onClick={() => {
                 setComponents(prev => prev.map(c => 
-                  c.id === selectedComponentId ? { ...c, rotation: (c.rotation || 0) + 90 } : c
+                  c.id === selectedComponentIds[0] ? { ...c, rotation: (c.rotation || 0) + 90 } : c
                 ));
               }}
             >
@@ -539,8 +561,8 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                 className="tool-btn"
                 title="Edit Component"
                 onClick={() => {
-                  if (onEditComponent) onEditComponent(selectedComponentId);
-                  setSelectedComponentId(null);
+                  if (onEditComponent) onEditComponent(selectedComponentIds[0]);
+                  setSelectedComponentIds([]);
                 }}
               >
                 <Edit2 size={18} />
@@ -554,8 +576,8 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
               title="Delete Component"
               style={{ color: '#ef4444' }}
               onClick={() => {
-                setComponents(prev => prev.filter(c => c.id !== selectedComponentId));
-                setSelectedComponentId(null);
+                setComponents(prev => prev.filter(c => c.id !== selectedComponentIds[0]));
+                setSelectedComponentIds([]);
               }}
             >
               <Trash2 size={18} />

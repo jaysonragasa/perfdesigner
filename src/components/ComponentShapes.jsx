@@ -3,7 +3,7 @@ import { BUILTIN_JSON_COMPONENTS } from '../data/builtinComponents';
 
 const SPACING = 20;
 
-export const Resistor = ({ x, y, layer, rotation = 0, params }) => {
+export const Resistor = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   // Assuming a horizontal resistor spanning 3 holes (4 pins total length but body in middle)
   const length = 4 * SPACING;
   const numBands = params?.numBands || 4;
@@ -31,11 +31,17 @@ export const Resistor = ({ x, y, layer, rotation = 0, params }) => {
       {/* Pins */}
       <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
       <rect x={length - 3} y="-3" width="6" height="6" fill="#d4af37" />
+      {isSelected && (
+        <rect 
+          x="-6" y="-12" width={length + 12} height="24" 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const Capacitor = ({ x, y, layer, rotation = 0, params }) => {
+export const Capacitor = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   // Ceramic capacitor, spans 1 hole normally
   const isLarge = params && params.uF >= 1000;
   const length = isLarge ? 2 * SPACING : SPACING;
@@ -52,11 +58,17 @@ export const Capacitor = ({ x, y, layer, rotation = 0, params }) => {
       {params?.uF && (
         <text x={length/2} y={isLarge ? -18 : -12} fill="white" fontSize="10" textAnchor="middle">{params.uF}µF</text>
       )}
+      {isSelected && (
+        <rect 
+          x="-6" y={-r - 4} width={length + 12} height={r * 2 + 8} 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const Electrolytic = ({ x, y, layer, rotation = 0, params }) => {
+export const Electrolytic = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   const isLarge = params && params.uF >= 1000;
   const length = isLarge ? 2 * SPACING : SPACING;
   const r = isLarge ? 16 : 9;
@@ -76,11 +88,17 @@ export const Electrolytic = ({ x, y, layer, rotation = 0, params }) => {
       {params?.uF && (
         <text x={length/2} y={isLarge ? -20 : -14} fill="white" fontSize="10" textAnchor="middle">{params.uF}µF</text>
       )}
+      {isSelected && (
+        <rect 
+          x="-6" y={-r - 4} width={length + 12} height={r * 2 + 8} 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const LED = ({ x, y, layer, rotation = 0 }) => {
+export const LED = ({ x, y, layer, rotation = 0, isSelected }) => {
   // Spans 1 hole
   const length = SPACING;
   return (
@@ -93,11 +111,17 @@ export const LED = ({ x, y, layer, rotation = 0 }) => {
       {/* Pins */}
       <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
       <rect x={length - 3} y="-3" width="6" height="6" fill="#d4af37" />
+      {isSelected && (
+        <rect 
+          x="-6" y="-10" width={length + 12} height="20" 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const DIP8 = ({ x, y, layer, rotation = 0 }) => {
+export const DIP8 = ({ x, y, layer, rotation = 0, isSelected }) => {
   // Spans 4x3 holes (pins at y and y+3, from x to x+3)
   return (
     <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
@@ -105,11 +129,17 @@ export const DIP8 = ({ x, y, layer, rotation = 0 }) => {
       {/* Notch */}
       <path d={`M -5 ${1.5 * SPACING - 5} A 5 5 0 0 1 -5 ${1.5 * SPACING + 5}`} fill="#1a1a1a" stroke="#404040" strokeWidth="1"/>
       <circle cx="5" cy="5" r="2" fill="#404040" />
+      {isSelected && (
+        <rect 
+          x="-7" y="-7" width={3 * SPACING + 14} height={3 * SPACING + 14} 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const Header = ({ x, y, layer, rotation = 0, params }) => {
+export const Header = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   const pins = params?.pins || 4;
   const baseColor = params?.baseColor || '#2a2a2a';
   return (
@@ -118,11 +148,17 @@ export const Header = ({ x, y, layer, rotation = 0, params }) => {
       {Array.from({ length: pins }).map((_, i) => (
         <rect key={i} x={i * SPACING - 4} y="-4" width="8" height="8" fill="#d4af37" />
       ))}
+      {isSelected && (
+        <rect 
+          x="-7" y="-9" width={(pins - 1) * SPACING + 14} height="18" 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const MaleHeader = ({ x, y, layer, rotation = 0, params }) => {
+export const MaleHeader = ({ x, y, layer, rotation = 0, params, isSelected }) => {
   const pins = params?.pins || 4;
   const baseColor = params?.baseColor || '#111111';
   
@@ -132,11 +168,17 @@ export const MaleHeader = ({ x, y, layer, rotation = 0, params }) => {
       {Array.from({ length: pins }).map((_, i) => (
         <rect key={i} x={i * SPACING - 3} y="-3" width="6" height="6" fill="#d4af37" />
       ))}
+      {isSelected && (
+        <rect 
+          x="-7" y="-9" width={(pins - 1) * SPACING + 14} height="18" 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const CustomShape = ({ x, y, layer, rotation = 0, def }) => {
+export const CustomShape = ({ x, y, layer, rotation = 0, def, isSelected, customComponents = [] }) => {
   if (!def) return null;
 
   // Fallback for missing width/height by finding pad bounds
@@ -167,16 +209,18 @@ export const CustomShape = ({ x, y, layer, rotation = 0, def }) => {
   return (
     <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
       {/* Custom IC Body */}
-      <rect 
-        x={rectX} 
-        y={rectY} 
-        width={bodyWidthPx} 
-        height={bodyHeightPx} 
-        fill="#1a1a1a" 
-        rx="2"
-        stroke="#404040"
-        strokeWidth="1"
-      />
+      {!def.hideBody && (
+        <rect 
+          x={rectX} 
+          y={rectY} 
+          width={bodyWidthPx} 
+          height={bodyHeightPx} 
+          fill="#1a1a1a" 
+          rx="2"
+          stroke="#404040"
+          strokeWidth="1"
+        />
+      )}
       
       {/* Pads (top view, just showing the pins inside the holes) */}
       {def.pads.map((p, i) => (
@@ -192,16 +236,31 @@ export const CustomShape = ({ x, y, layer, rotation = 0, def }) => {
       {def.texts && def.texts.map((t, i) => (
         <text key={`text-${i}`} x={t.x * SPACING} y={t.y * SPACING} fill="white" fontSize={t.size || 25} textAnchor="middle" dominantBaseline="central" pointerEvents="none">{t.text}</text>
       ))}
+
+      {/* Nested Components */}
+      {def.childComponents && def.childComponents.map((child, i) => (
+        <React.Fragment key={`child-${child.id || i}`}>
+          {renderComponent(child, layer, customComponents)}
+        </React.Fragment>
+      ))}
+
+      {/* Selection Border */}
+      {isSelected && (
+        <rect 
+          x={rectX - 2} y={rectY - 2} width={bodyWidthPx + 4} height={bodyHeightPx + 4} 
+          fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
+        />
+      )}
     </g>
   );
 };
 
-export const renderComponent = (comp, layer, customComponents = []) => {
-  const props = { x: comp.x, y: comp.y, layer, rotation: comp.rotation, key: comp.id, params: comp.params };
+export const renderComponent = (comp, layer, customComponents = [], isSelected = false) => {
+  const props = { x: comp.x, y: comp.y, layer, rotation: comp.rotation, key: comp.id, params: comp.params, isSelected };
   
   if (comp.type.startsWith('custom_')) {
     const def = customComponents.find(c => c.id === comp.type);
-    return <CustomShape {...props} def={def} />;
+    return <CustomShape {...props} def={def} customComponents={customComponents} />;
   }
 
   if (comp.type.startsWith('saved_resistor_')) {
