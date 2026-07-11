@@ -31,7 +31,7 @@ function App() {
   const [wireColor, setWireColor] = useState('#10b981'); // Default to green wire
   
   // Board Data
-  const [boardSize, setBoardSize] = useState({ width: 40, height: 30 });
+  const [boardSize, setBoardSize] = useState({ width: 32, height: 22 });
   const [boardTransform, setBoardTransform] = useState({ x: 50, y: 50, scale: 1 });
   
   const [components, setComponents] = useState([]);

@@ -199,7 +199,8 @@ export const BUILTIN_JSON_COMPONENTS = [
       "texts": [
         { "text": "GND", "size": 11, "x": 1.1277024937499909, "y": 2.9975874474832187 },
         { "text": "VCC", "size": 11, "x": 1.1084253292785147, "y": 3.9421685065855705 },
-        { "text": "IO", "size": 11, "x": 0.8770993556207956, "y": 4.963858223573828 }
+        { "text": "IO", "size": 11, "x": 0.8770993556207956, "y": 4.963858223573828 },
+        { "text": "TOUCH", "size": 25, "x": 4.031046066152957, "y": 6.980422350683943 }
       ]
     }
   },
@@ -307,6 +308,46 @@ export const BUILTIN_JSON_COMPONENTS = [
         { "text": "SPEAKER", "size": 25, "x": 4.5, "y": 4.5 },
         { "text": "+", "size": 25, "x": 3.9722168753997185, "y": 7.884021210672394 },
         { "text": "_", "size": 25, "x": 4.9346449261414085, "y": 7.511468416836902 }
+      ]
+    }
+  },
+  {
+    "id": "esp32s3sm_breakout",
+    "categoryId": "micro_controllers",
+    "categoryName": "Micro Controllers",
+    "name": "ESP32-S3 SuperMini Breakout",
+    "icon": "🚀",
+    "def": {
+      "name": "ESP32S3SM+Breakout",
+      "hideBody": true,
+      "pads": [
+        { "x": 0, "y": 3 }, { "x": 1, "y": 3 }, { "x": 2, "y": 3 }, { "x": 3, "y": 3 }, { "x": 4, "y": 3 }, { "x": 5, "y": 3 }, { "x": 6, "y": 3 }, { "x": 7, "y": 3 }, { "x": 8, "y": 3 },
+        { "x": 0, "y": 9 }, { "x": 1, "y": 9 }, { "x": 2, "y": 9 }, { "x": 3, "y": 9 }, { "x": 4, "y": 9 }, { "x": 5, "y": 9 }, { "x": 6, "y": 9 }, { "x": 7, "y": 9 }, { "x": 8, "y": 9 },
+        { "x": 0, "y": 0 }, { "x": 0, "y": 1 }, { "x": 0, "y": 2 }, { "x": 1, "y": 0 }, { "x": 1, "y": 1 }, { "x": 1, "y": 2 }, { "x": 2, "y": 0 }, { "x": 2, "y": 1 }, { "x": 2, "y": 2 },
+        { "x": 0, "y": 10 }, { "x": 0, "y": 11 }, { "x": 0, "y": 12 }, { "x": 1, "y": 10 }, { "x": 1, "y": 11 }, { "x": 1, "y": 12 }, { "x": 2, "y": 10 }, { "x": 3, "y": 10 }, { "x": 4, "y": 10 }, { "x": 5, "y": 10 }, { "x": 6, "y": 10 }, { "x": 7, "y": 10 }, { "x": 8, "y": 10 },
+        { "x": 2, "y": 11 }, { "x": 3, "y": 11 }, { "x": 4, "y": 11 }, { "x": 5, "y": 11 }, { "x": 6, "y": 11 }, { "x": 7, "y": 11 }, { "x": 8, "y": 11 },
+        { "x": 2, "y": 12 }, { "x": 3, "y": 12 }, { "x": 4, "y": 12 }, { "x": 5, "y": 12 }, { "x": 6, "y": 12 }, { "x": 7, "y": 12 }, { "x": 8, "y": 12 },
+        { "x": 3, "y": 0 }, { "x": 4, "y": 0 }, { "x": 5, "y": 0 }, { "x": 6, "y": 0 }, { "x": 7, "y": 0 }, { "x": 8, "y": 0 },
+        { "x": 3, "y": 1 }, { "x": 4, "y": 1 }, { "x": 5, "y": 1 }, { "x": 6, "y": 1 }, { "x": 7, "y": 1 }, { "x": 8, "y": 1 },
+        { "x": 3, "y": 2 }, { "x": 4, "y": 2 }, { "x": 5, "y": 2 }, { "x": 6, "y": 2 }, { "x": 7, "y": 2 }, { "x": 8, "y": 2 }
+      ],
+      "width": 9.448818897637794,
+      "height": 13,
+      "bodyWidth": 9.448818897637794,
+      "bodyHeight": 13,
+      "childComponents": [
+        { "id": "1783656776256", "type": "esp32s3_supermini", "x": 0, "y": 3, "rotation": 0, "width": 9.448818897637794, "height": 7.480314960629921, "params": null },
+        { "id": "1783672624183", "type": "male_header", "x": 0, "y": 0, "rotation": 90, "width": null, "height": null, "params": { "pins": 3, "baseColor": "#ff0000" } },
+        { "id": "1783672642911", "type": "male_header", "x": 1, "y": 0, "rotation": 90, "width": null, "height": null, "params": { "pins": 3, "baseColor": "#111111" } },
+        { "id": "1783672664109", "type": "male_header", "x": 2, "y": 0, "rotation": 90, "width": null, "height": null, "params": { "pins": 3, "baseColor": "#44ff00" } },
+        { "id": "1783672805798", "type": "male_header", "x": 0, "y": 10, "rotation": 90, "width": null, "height": null, "params": { "pins": 3, "baseColor": "#3bd5fc" } },
+        { "id": "1783672858558", "type": "male_header", "x": 1, "y": 10, "rotation": 90, "width": null, "height": null, "params": { "pins": 3, "baseColor": "#9d8f72" } },
+        { "id": "1783674004852", "type": "male_header", "x": 2, "y": 10, "rotation": 0, "width": null, "height": null, "params": { "pins": 7, "baseColor": "#eeff00" } },
+        { "id": "1783674031299", "type": "male_header", "x": 2, "y": 11, "rotation": 0, "width": null, "height": null, "params": { "pins": 7, "baseColor": "#ff0000" } },
+        { "id": "1783674038030", "type": "male_header", "x": 2, "y": 12, "rotation": 0, "width": null, "height": null, "params": { "pins": 7, "baseColor": "#111111" } },
+        { "id": "1783674049204", "type": "male_header", "x": 3, "y": 0, "rotation": 0, "width": null, "height": null, "params": { "pins": 6, "baseColor": "#111111" } },
+        { "id": "1783674063539", "type": "male_header", "x": 3, "y": 1, "rotation": 0, "width": null, "height": null, "params": { "pins": 6, "baseColor": "#ff0000" } },
+        { "id": "1783674078796", "type": "male_header", "x": 3, "y": 2, "rotation": 0, "width": null, "height": null, "params": { "pins": 6, "baseColor": "#fbff00" } }
       ]
     }
   }
