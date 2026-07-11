@@ -1,5 +1,5 @@
-import React from 'react';
-import { Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 
 const CATEGORIES = [
   {
@@ -38,6 +38,17 @@ const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelected
     });
   }
 
+  const [expandedCategories, setExpandedCategories] = useState({
+    'Basic': true
+  });
+
+  const toggleCategory = (catName) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [catName]: !prev[catName]
+    }));
+  };
+
   return (
     <div className="sidebar" style={{ overflowY: 'auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -54,53 +65,73 @@ const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelected
         Select a component below, then click on the board to place it.
       </p>
       
-      <div className="component-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {allCategories.map(cat => (
-          <div key={cat.name}>
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.5px', marginBottom: '8px', fontWeight: '600' }}>
-              {cat.name}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {cat.items.map(comp => (
-                <div 
-                  key={comp.id}
-                  className={`component-item ${selectedComponentType === comp.id ? 'selected' : ''}`}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', cursor: 'pointer', borderRadius: '6px' }}
-                >
-                  <div 
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}
-                    onClick={() => {
-                      if (comp.id === 'capacitor' || comp.id === 'electrolytic' || comp.id === 'male_header') {
-                        if (setShowComponentParams) setShowComponentParams({ type: comp.id });
-                      } else {
-                        setSelectedComponentType(comp.id);
-                        if (activeTool !== 'component') setActiveTool('component');
-                        if (setPendingComponentParams) setPendingComponentParams(null);
-                      }
-                    }}
-                  >
-                    <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>
-                      {comp.icon}
-                    </div>
-                    <span style={{ fontSize: '14px', fontWeight: '500' }}>{comp.name}</span>
-                  </div>
-                  {comp.isCustom && onDeleteCustomComponent && (
+      <div className="component-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {allCategories.map(cat => {
+          const isExpanded = !!expandedCategories[cat.name];
+          return (
+            <div key={cat.name} style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '4px' }}>
+              <div 
+                onClick={() => toggleCategory(cat.name)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between',
+                  padding: '8px 0',
+                  cursor: 'pointer',
+                  fontSize: '11px', 
+                  textTransform: 'uppercase', 
+                  color: 'var(--text-muted)', 
+                  letterSpacing: '0.5px', 
+                  fontWeight: '600' 
+                }}
+              >
+                {cat.name}
+                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              </div>
+              {isExpanded && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingBottom: '8px' }}>
+                  {cat.items.map(comp => (
                     <div 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteCustomComponent(comp.id);
-                      }}
-                      style={{ color: 'var(--text-muted)', display: 'flex', padding: '4px' }}
-                      title="Delete Component"
+                      key={comp.id}
+                      className={`component-item ${selectedComponentType === comp.id ? 'selected' : ''}`}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', cursor: 'pointer', borderRadius: '6px' }}
                     >
-                      <Trash2 size={16} />
+                      <div 
+                        style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}
+                        onClick={() => {
+                          if (comp.id === 'capacitor' || comp.id === 'electrolytic' || comp.id === 'male_header') {
+                            if (setShowComponentParams) setShowComponentParams({ type: comp.id });
+                          } else {
+                            setSelectedComponentType(comp.id);
+                            if (activeTool !== 'component') setActiveTool('component');
+                            if (setPendingComponentParams) setPendingComponentParams(null);
+                          }
+                        }}
+                      >
+                        <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>
+                          {comp.icon}
+                        </div>
+                        <span style={{ fontSize: '14px', fontWeight: '500' }}>{comp.name}</span>
+                      </div>
+                      {comp.isCustom && onDeleteCustomComponent && (
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteCustomComponent(comp.id);
+                          }}
+                          style={{ color: 'var(--text-muted)', display: 'flex', padding: '4px' }}
+                          title="Delete Component"
+                        >
+                          <Trash2 size={16} />
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
