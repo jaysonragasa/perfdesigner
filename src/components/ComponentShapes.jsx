@@ -98,22 +98,37 @@ export const Electrolytic = ({ x, y, layer, rotation = 0, params, isSelected }) 
   );
 };
 
-export const LED = ({ x, y, layer, rotation = 0, isSelected }) => {
-  // Spans 1 hole
-  const length = SPACING;
+export const LED = ({ x, y, layer, rotation = 0, params, isSelected }) => {
+  // Spans 2 holes (3 pins)
+  const length = 2 * SPACING;
+  const color = params?.color || '#ff0000';
   return (
     <g transform={`translate(${x * SPACING}, ${y * SPACING}) rotate(${rotation})`} opacity={layer === 'top' ? 1 : 0.4}>
       <line x1="0" y1="0" x2={length} y2="0" stroke="#silver" strokeWidth="2" />
-      <circle cx={length/2} cy="0" r="6" fill="#ff3333" stroke="#cc0000" strokeWidth="1" opacity="0.8" />
+      
+      {/* 3-pin LED Body: bigger than normal */}
+      <circle cx={length/2} cy="0" r="14" fill={color} stroke="#cc0000" strokeWidth="1" opacity="0.85" />
+      
+      {/* Glare/highlight to make it look like a lens */}
+      <circle cx={length/2} cy="-4" r="6" fill="rgba(255,255,255,0.4)" />
+      
       {/* Flat edge for cathode */}
-      <line x1={length/2 + 5} y1="-5" x2={length/2 + 5} y2="5" stroke="#cc0000" strokeWidth="2" />
+      <line x1={length/2 + 11} y1="-8" x2={length/2 + 11} y2="8" stroke="#aa0000" strokeWidth="3" />
       
       {/* Pins */}
       <rect x="-3" y="-3" width="6" height="6" fill="#d4af37" />
+      <rect x={length/2 - 3} y="-3" width="6" height="6" fill="#d4af37" />
       <rect x={length - 3} y="-3" width="6" height="6" fill="#d4af37" />
+
+      {/* Anode indicator (+) */}
+      <text x="0" y="-14" fill="white" fontSize="14" fontWeight="bold" textAnchor="middle">+</text>
+      
+      {/* Cathode indicator (-) */}
+      <text x={length} y="-14" fill="white" fontSize="14" fontWeight="bold" textAnchor="middle">-</text>
+
       {isSelected && (
         <rect 
-          x="-6" y="-10" width={length + 12} height="20" 
+          x="-10" y="-18" width={length + 20} height="36" 
           fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 2" pointerEvents="none"
         />
       )}

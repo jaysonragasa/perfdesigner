@@ -333,7 +333,7 @@ function App() {
               if (comp && comp.type.startsWith('custom_')) {
                 const def = customComponents.find(c => c.id === comp.type);
                 if (def) setShowComponentCreator(def);
-              } else if (comp && (comp.type === 'capacitor' || comp.type === 'electrolytic' || comp.type === 'male_header')) {
+              } else if (comp && (comp.type === 'capacitor' || comp.type === 'electrolytic' || comp.type === 'male_header' || comp.type === 'led')) {
                 setShowComponentParams({ type: comp.type, editingId: comp.id, params: comp.params });
               }
             }}
@@ -496,6 +496,7 @@ function App() {
                  if (!w) {
                     if (c.type === 'resistor') w = 4;
                     else if (c.type === 'capacitor' || c.type === 'electrolytic') w = 1;
+                    else if (c.type === 'led') w = 3;
                     else if (c.type === 'male_header' || c.type === 'header4') {
                        w = c.params?.pins || 4;
                        if (c.rotation === 90 || c.rotation === 270) w = 1;

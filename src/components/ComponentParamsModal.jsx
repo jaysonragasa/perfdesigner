@@ -8,6 +8,7 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
   
   const [pins, setPins] = useState(initialParams.pins || 4);
   const [baseColor, setBaseColor] = useState(initialParams.baseColor || (componentType === 'header4' ? '#2a2a2a' : '#111111'));
+  const [ledColor, setLedColor] = useState(initialParams.color || '#ff0000');
   
   // Dragging logic
   const [isDragging, setIsDragging] = useState(false);
@@ -49,11 +50,14 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
       onSave({ uF, voltage });
     } else if (isHeader) {
       onSave({ pins, baseColor });
+    } else if (isLed) {
+      onSave({ color: ledColor });
     }
   };
 
   const isCapacitor = componentType === 'capacitor' || componentType === 'electrolytic';
   const isHeader = componentType === 'male_header' || componentType === 'header4';
+  const isLed = componentType === 'led';
 
   return (
     <div 
@@ -144,6 +148,25 @@ const ComponentParamsModal = ({ onClose, onSave, initialParams = {}, componentTy
                 }}
               />
             </div>
+          </div>
+        )}
+        {isLed && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>LED Color</label>
+            <input 
+              type="color" 
+              value={ledColor}
+              onChange={(e) => setLedColor(e.target.value)}
+              style={{
+                width: '100%',
+                height: '35px',
+                boxSizing: 'border-box',
+                background: 'rgba(0,0,0,0.3)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            />
           </div>
         )}
       </div>

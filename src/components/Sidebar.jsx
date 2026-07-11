@@ -113,7 +113,7 @@ const Sidebar = ({ activeTool, setActiveTool, selectedComponentType, setSelected
                       <div 
                         style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}
                         onClick={() => {
-                          if (comp.id === 'capacitor' || comp.id === 'electrolytic' || comp.id === 'male_header' || comp.id === 'header4' || comp.id === 'resistor') {
+                          if (comp.id === 'capacitor' || comp.id === 'electrolytic' || comp.id === 'male_header' || comp.id === 'header4' || comp.id === 'resistor' || comp.id === 'led') {
                             if (setShowComponentParams) setShowComponentParams({ type: comp.id });
                           } else {
                             setSelectedComponentType(comp.id);

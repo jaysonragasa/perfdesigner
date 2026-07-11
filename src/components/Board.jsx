@@ -115,7 +115,7 @@ export function getComponentPads(comp, customComponents = []) {
     const isLarge = comp.params && comp.params.uF >= 1000;
     localPads = [{x: 0, y: 0}, {x: isLarge ? 2 : 1, y: 0}];
   } else if (comp.type === 'led') {
-    localPads = [{x: 0, y: 0}, {x: 1, y: 0}];
+    localPads = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}];
   } else if (comp.type === 'dip8' || comp.type === 'dip16') {
     for (let i=0; i<4; i++) {
       localPads.push({x: i, y: 0});
