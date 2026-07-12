@@ -140,6 +140,7 @@ export function getComponentPads(comp, customComponents = []) {
 
 const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, transform, setTransform }) => {
   const svgRef = useRef(null);
+  const justDraggedRef = useRef(false);
   
   // Pan and Zoom state
   const [isDragging, setIsDragging] = useState(false);
@@ -245,6 +246,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
 
          const newPoints = [...newLinks[linkIndex].points];
          newPoints[draggedNode.pointIndex] = { x: snappedX, y: snappedY };
+         justDraggedRef.current = true;
          
          newLinks[linkIndex] = { ...newLinks[linkIndex], points: newPoints };
          return newLinks;
@@ -477,6 +479,10 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                     onMouseDown={(e) => handleNodeMouseDown(e, link.id, index)}
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (justDraggedRef.current) {
+                        justDraggedRef.current = false;
+                        return;
+                      }
                       onPadClick(p.x, p.y, e);
                     }}
                   >
