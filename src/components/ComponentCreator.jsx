@@ -413,7 +413,7 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
                     setTexts(prev => prev.map((t, i) => i === selectedTextIndex ? { ...t, size: numVal } : t));
                  }
               }}
-              style={{ width: '90px' }} 
+              style={{ width: '120px' }} 
             />
             
             <div style={{ width: '1px', height: '20px', background: 'var(--border-subtle)', margin: '0 4px' }}></div>
