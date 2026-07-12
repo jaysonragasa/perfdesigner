@@ -367,7 +367,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
 
   const handlePadInteraction = (x, y, e) => {
     if (isDragging || draggedNode) return;
-    onPadClick(x, y);
+    onPadClick(x, y, e);
   };
 
   return (
@@ -477,7 +477,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                     onMouseDown={(e) => handleNodeMouseDown(e, link.id, index)}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onPadClick(p.x, p.y);
+                      onPadClick(p.x, p.y, e);
                     }}
                   >
                     <circle r={12} fill="transparent" style={{ pointerEvents: 'all' }} />

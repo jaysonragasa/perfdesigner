@@ -61,7 +61,8 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeTool]);
 
-  const handlePadClick = (x, y) => {
+  const handlePadClick = (x, y, e = null) => {
+    const isCtrlClick = e && (e.ctrlKey || e.metaKey);
     if (activeTool === 'component' && selectedComponentType) {
       let compWidth = null;
       let compHeight = null;
@@ -91,7 +92,7 @@ function App() {
     } else if (activeTool === 'link') {
       setLinks(prevLinks => {
         const newLinks = [...prevLinks];
-        if (activeLinkId) {
+        if (activeLinkId && !isCtrlClick) {
           // Append to existing active link
           const linkIndex = newLinks.findIndex(l => l.id === activeLinkId);
           if (linkIndex !== -1) {
