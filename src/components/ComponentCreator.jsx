@@ -403,18 +403,17 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
             />
             
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Size:</label>
-            <input 
-              type="number" 
-              min="4" max="72"
+            <NumberInput 
+              min={4} max={72}
               value={newFontSize}
-              onChange={e => {
-                 const val = parseInt(e.target.value) || 25;
-                 setNewFontSize(val);
+              onChange={val => {
+                 const numVal = parseInt(val) || 25;
+                 setNewFontSize(numVal);
                  if (selectedTextIndex !== null && texts[selectedTextIndex]) {
-                    setTexts(prev => prev.map((t, i) => i === selectedTextIndex ? { ...t, size: val } : t));
+                    setTexts(prev => prev.map((t, i) => i === selectedTextIndex ? { ...t, size: numVal } : t));
                  }
               }}
-              style={{ width: '60px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', padding: '6px 8px', color: 'white', borderRadius: '4px', outline: 'none', boxSizing: 'border-box', fontSize: '12px' }} 
+              style={{ width: '90px' }} 
             />
             
             <div style={{ width: '1px', height: '20px', background: 'var(--border-subtle)', margin: '0 4px' }}></div>

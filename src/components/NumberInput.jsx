@@ -3,13 +3,15 @@ import { Minus, Plus } from 'lucide-react';
 
 const NumberInput = ({ value, onChange, min, max, step = 1, style = {} }) => {
   const handleDecrement = () => {
-    const newVal = parseFloat(value) - step;
+    let newVal = parseFloat(value) - step;
+    newVal = parseFloat(newVal.toFixed(4));
     if (min !== undefined && newVal < min) return;
     onChange(newVal);
   };
 
   const handleIncrement = () => {
-    const newVal = parseFloat(value) + step;
+    let newVal = parseFloat(value) + step;
+    newVal = parseFloat(newVal.toFixed(4));
     if (max !== undefined && newVal > max) return;
     onChange(newVal);
   };
