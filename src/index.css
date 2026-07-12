@@ -62,8 +62,8 @@ body {
 /* Glass panel utility */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
