@@ -32,6 +32,10 @@
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-panel);
   backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  will-change: transform;
+  transform: translateZ(0);
+  isolation: isolate;
   z-index: 10;
 }
 
@@ -68,6 +72,9 @@
   background: var(--bg-panel);
   border-right: 1px solid var(--border-subtle);
   backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  will-change: transform;
+  transform: translateZ(0);
   display: flex;
   flex-direction: column;
   padding: 20px;

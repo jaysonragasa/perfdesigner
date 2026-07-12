@@ -67,6 +67,9 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  will-change: transform;
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 /* Beautiful custom scrollbar */
