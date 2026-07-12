@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import './App.css';
 import Board, { getComponentPads } from './components/Board';
 import Toolbar from './components/Toolbar';
@@ -339,6 +340,22 @@ function App() {
               }
             }}
           />
+            <div style={{ position: 'absolute', bottom: '20px', right: '20px', display: 'flex', gap: '8px', background: 'var(--bg-panel)', padding: '8px', borderRadius: '8px', backdropFilter: 'blur(10px)', border: '1px solid var(--border-subtle)', zIndex: 10 }}>
+              <button 
+                className="tool-btn" 
+                title="Zoom Out"
+                onClick={() => setBoardTransform(prev => ({ ...prev, scale: Math.max(0.2, prev.scale * 0.9) }))}
+              >
+                <ZoomOut size={18} />
+              </button>
+              <button 
+                className="tool-btn" 
+                title="Zoom In"
+                onClick={() => setBoardTransform(prev => ({ ...prev, scale: Math.min(5, prev.scale * 1.1) }))}
+              >
+                <ZoomIn size={18} />
+              </button>
+            </div>
         </div>
         <LayersPanel 
           layers={layers} 

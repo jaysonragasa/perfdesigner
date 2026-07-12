@@ -82,23 +82,8 @@ const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, se
       </div>
 
 
-      <div className="toolbar-group">
-        <button 
-          className="tool-btn" 
-          title="Zoom Out"
-          onClick={() => setBoardTransform && setBoardTransform(prev => ({ ...prev, scale: Math.max(0.2, prev.scale * 0.9) }))}
-        >
-          <ZoomOut size={18} />
-        </button>
-        <button 
-          className="tool-btn" 
-          title="Zoom In"
-          onClick={() => setBoardTransform && setBoardTransform(prev => ({ ...prev, scale: Math.min(5, prev.scale * 1.1) }))}
-        >
-          <ZoomIn size={18} />
-        </button>
-      </div>
 
+      
       <div className="toolbar-group">
         <button 
           className="tool-btn" 
@@ -107,9 +92,7 @@ const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, se
         >
           <Settings size={18} />
         </button>
-      </div>
-      
-      <div className="toolbar-group">
+        <div style={{ width: '1px', height: '24px', background: 'var(--border-active)', margin: '0 8px' }}></div>
         <label className="tool-btn" title="Open Design" style={{ cursor: 'pointer', margin: 0 }}>
           <FolderOpen size={18} />
           <input type="file" accept=".json" style={{ display: 'none' }} onChange={onOpenDesign} />
