@@ -8,7 +8,7 @@ const PRESETS = [
   { label: '80 × 60 mm  (27 × 22 holes)',  cols: 27, rows: 22 },
   { label: '90 × 70 mm  (31 × 26 holes)',  cols: 31, rows: 26 },
   { label: '120 × 80 mm (42 × 30 holes)',  cols: 42, rows: 30 },
-  { label: '150 × 90 mm (43 × 69 holes)',  cols: 43, rows: 69 },
+  { label: '150 × 90 mm (69 × 43 holes)',  cols: 69, rows: 43 },
   { label: '180 × 120 mm (65 × 46 holes)', cols: 65, rows: 46 },
 ];
 
