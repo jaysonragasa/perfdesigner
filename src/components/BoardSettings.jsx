@@ -3,13 +3,13 @@ import { X, Save } from 'lucide-react';
 import NumberInput from './NumberInput';
 
 const PRESETS = [
-  { label: '60 × 40 mm  (20 × 14 holes)',  widthMM: 60,  heightMM: 40  },
-  { label: '70 × 50 mm  (24 × 18 holes)',  widthMM: 70,  heightMM: 50  },
-  { label: '80 × 60 mm  (27 × 22 holes)',  widthMM: 80,  heightMM: 60  },
-  { label: '90 × 70 mm  (31 × 26 holes)',  widthMM: 90,  heightMM: 70  },
-  { label: '120 × 80 mm (42 × 30 holes)',  widthMM: 120, heightMM: 80  },
-  { label: '150 × 90 mm (43 × 69 holes)',  widthMM: 150, heightMM: 90  },
-  { label: '180 × 120 mm (65 × 46 holes)', widthMM: 180, heightMM: 120 },
+  { label: '60 × 40 mm  (20 × 14 holes)',  cols: 20, rows: 14 },
+  { label: '70 × 50 mm  (24 × 18 holes)',  cols: 24, rows: 18 },
+  { label: '80 × 60 mm  (27 × 22 holes)',  cols: 27, rows: 22 },
+  { label: '90 × 70 mm  (31 × 26 holes)',  cols: 31, rows: 26 },
+  { label: '120 × 80 mm (42 × 30 holes)',  cols: 42, rows: 30 },
+  { label: '150 × 90 mm (43 × 69 holes)',  cols: 43, rows: 69 },
+  { label: '180 × 120 mm (65 × 46 holes)', cols: 65, rows: 46 },
 ];
 
 const BoardSettings = ({ onClose, onSave, currentWidth, currentHeight, showGoldBorder, setShowGoldBorder, dimInactiveLayers, setDimInactiveLayers, boardColor, setBoardColor }) => {
@@ -104,8 +104,9 @@ const BoardSettings = ({ onClose, onSave, currentWidth, currentHeight, showGoldB
               const idx = parseInt(e.target.value);
               if (isNaN(idx)) return;
               const preset = PRESETS[idx];
-              setWidthMM(preset.widthMM);
-              setHeightMM(preset.heightMM);
+              // derive mm from exact hole counts so rounding is exact
+              setWidthMM(parseFloat((preset.cols * 2.54).toFixed(4)));
+              setHeightMM(parseFloat((preset.rows * 2.54).toFixed(4)));
               e.target.value = '';
             }}
             style={{
