@@ -2,6 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import NumberInput from './NumberInput';
 
+const PRESETS = [
+  { label: '60 × 40 mm  (20 × 14 holes)',  widthMM: 60,  heightMM: 40  },
+  { label: '70 × 50 mm  (24 × 18 holes)',  widthMM: 70,  heightMM: 50  },
+  { label: '80 × 60 mm  (27 × 22 holes)',  widthMM: 80,  heightMM: 60  },
+  { label: '90 × 70 mm  (31 × 26 holes)',  widthMM: 90,  heightMM: 70  },
+  { label: '120 × 80 mm (42 × 30 holes)',  widthMM: 120, heightMM: 80  },
+  { label: '150 × 90 mm (43 × 69 holes)',  widthMM: 150, heightMM: 90  },
+  { label: '180 × 120 mm (65 × 46 holes)', widthMM: 180, heightMM: 120 },
+];
+
 const BoardSettings = ({ onClose, onSave, currentWidth, currentHeight, showGoldBorder, setShowGoldBorder, dimInactiveLayers, setDimInactiveLayers, boardColor, setBoardColor }) => {
   const [widthMM, setWidthMM] = useState((currentWidth * 2.54).toFixed(2));
   const [heightMM, setHeightMM] = useState((currentHeight * 2.54).toFixed(2));
@@ -85,6 +95,38 @@ const BoardSettings = ({ onClose, onSave, currentWidth, currentHeight, showGoldB
       </div>
 
       <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Presets */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Preset Sizes</label>
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              const idx = parseInt(e.target.value);
+              if (isNaN(idx)) return;
+              const preset = PRESETS[idx];
+              setWidthMM(preset.widthMM);
+              setHeightMM(preset.heightMM);
+              e.target.value = '';
+            }}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-main)',
+              borderRadius: '6px',
+              padding: '8px 10px',
+              fontSize: '13px',
+              outline: 'none',
+              cursor: 'pointer',
+              width: '100%'
+            }}
+          >
+            <option value="" disabled style={{ color: 'var(--text-muted)' }}>— select a preset —</option>
+            {PRESETS.map((p, i) => (
+              <option key={i} value={i} style={{ background: '#1a1e2e' }}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+
         <div style={{ display: 'flex', gap: '16px' }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Width (mm)</label>
