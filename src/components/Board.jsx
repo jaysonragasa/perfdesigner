@@ -501,20 +501,25 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
         })()}
 
         {/* Drawn Components */}
-        {layers.find(l => l.id === 'top')?.visible !== false && components.map(comp => (
-          <g 
-            key={comp.id}
-            opacity={dimInactiveLayers && activeLayerId !== 'top' ? 0.5 : 1}
-            onMouseDown={(e) => { if (activeTool !== 'link') handleComponentMouseDown(e, comp); }}
-            onClick={(e) => { if (activeTool !== 'link') e.stopPropagation(); }}
-            style={{ 
-              cursor: draggedComponent === comp.id ? 'grabbing' : 'grab',
-              pointerEvents: activeTool === 'link' ? 'none' : 'auto'
-            }}
-          >
-            {renderComponent(comp, activeLayerId, customComponents, selectedComponentIds.includes(comp.id))}
-          </g>
-        ))}
+        {components.map(comp => {
+          const compLayerId = comp.layer || 'top';
+          const compLayer = layers.find(l => l.id === compLayerId);
+          if (compLayer && compLayer.visible === false) return null;
+          return (
+            <g 
+              key={comp.id}
+              opacity={dimInactiveLayers && activeLayerId !== compLayerId ? 0.5 : 1}
+              onMouseDown={(e) => { if (activeTool !== 'link') handleComponentMouseDown(e, comp); }}
+              onClick={(e) => { if (activeTool !== 'link') e.stopPropagation(); }}
+              style={{ 
+                cursor: draggedComponent === comp.id ? 'grabbing' : 'grab',
+                pointerEvents: activeTool === 'link' ? 'none' : 'auto'
+              }}
+            >
+              {renderComponent(comp, activeLayerId, customComponents, selectedComponentIds.includes(comp.id))}
+            </g>
+          );
+        })}
       </g>
     </svg>
       

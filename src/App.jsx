@@ -82,6 +82,7 @@ function App() {
         type: selectedComponentType,
         x,
         y,
+        layer: activeLayerId,
         rotation: 0,
         width: compWidth,
         height: compHeight,
