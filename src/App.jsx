@@ -91,6 +91,7 @@ function App() {
           const pasted = clipboard.map((c, i) => ({
             ...c,
             id: `${now}_${i}`,
+            layer: activeLayerId, // Always paste onto the current active layer
             x: c.x + 2,
             y: c.y + 2,
           }));
