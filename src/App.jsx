@@ -11,6 +11,15 @@ import ResistorBuilderModal from './components/ResistorBuilderModal';
 import MacroBuilderModal from './components/MacroBuilderModal';
 
 import LayersPanel from './components/LayersPanel';
+import StatusBar from './components/StatusBar';
+
+// Default status messages shown per active tool. Individual actions can override
+// the status bar via setStatusMessage for more contextual hints.
+const TOOL_STATUS = {
+  select: 'Select and drag components. Hold middle-click to pan, scroll to zoom.',
+  component: 'Click a hole on the board to place the selected component.',
+  link: 'Press CTRL+LEFT CLICK to create a new link.'
+};
 
 function App() {
   const [layers, setLayers] = useState([
@@ -30,6 +39,7 @@ function App() {
   const [showMacroBuilder, setShowMacroBuilder] = useState(null);
   const [customComponents, setCustomComponents] = useState([]);
   const [wireColor, setWireColor] = useState('#10b981'); // Default to green wire
+  const [statusMessage, setStatusMessage] = useState(TOOL_STATUS.select);
   
   // Board Data
   const [boardSize, setBoardSize] = useState({ width: 32, height: 22 });
@@ -51,6 +61,11 @@ function App() {
   useEffect(() => {
     setActiveLinkId(null);
   }, [activeLayerId]);
+
+  // Update the status bar message when the active tool changes
+  useEffect(() => {
+    setStatusMessage(TOOL_STATUS[activeTool] || TOOL_STATUS.select);
+  }, [activeTool]);
 
   // Press ESC to end current link
   useEffect(() => {
@@ -437,6 +452,7 @@ function App() {
           setActiveLayerId={setActiveLayerId} 
         />
       </div>
+      <StatusBar message={statusMessage} />
       {showComponentCreator && (
         <ComponentCreator 
           editingDef={typeof showComponentCreator === 'object' ? showComponentCreator : null}
