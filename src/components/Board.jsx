@@ -376,7 +376,8 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     setDraggedComponentStartPos({ ...comp });
 
     // Record start positions of ALL selected (+ clicked) components for multi-drag
-    const dragIds = (selectedComponentIds.includes(comp.id) ? selectedComponentIds : [comp.id]);
+    // IMPORTANT: use newSelection (computed above) not selectedComponentIds (stale React state)
+    const dragIds = newSelection.length > 0 ? newSelection : [comp.id];
     const startMap = {};
     components.forEach(c => {
       if (dragIds.includes(c.id)) startMap[c.id] = { x: c.x, y: c.y };
