@@ -380,7 +380,10 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     const dragIds = newSelection.length > 0 ? newSelection : [comp.id];
     const startMap = {};
     components.forEach(c => {
-      if (dragIds.includes(c.id)) startMap[c.id] = { x: c.x, y: c.y };
+      // Store the FULL component snapshot (not just x/y): getComponentPads needs
+      // `type`/`rotation` to resolve pads. A bare {x,y} makes comp.type undefined
+      // and throws in getComponentPads, which breaks dragging entirely.
+      if (dragIds.includes(c.id)) startMap[c.id] = { ...c };
     });
     setDraggedComponentsStartPos(startMap);
 
