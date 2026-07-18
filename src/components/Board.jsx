@@ -468,31 +468,41 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
           </g>
         ))}
 
-        {/* Links (Nets) */}
+        {/* Layered content: links AND components are drawn per-layer so that
+            reordering layers restacks everything on that layer together.
+            Layers are iterated in reverse array order so the layer at the top
+            of the Layers panel (index 0) is painted last (on top). Link paths
+            are precomputed against a global ordering so jump-arc crossing
+            detection stays consistent regardless of the render grouping. */}
         {(() => {
+          const orderedVisibleLayers = [...layers].reverse().filter(l => l.visible);
+
+          // Global link ordering (matches the panel top-on-top order) for arc detection
           const globallyOrderedLinks = [];
-          [...layers].reverse().forEach(layerItem => {
-            if (layerItem.visible) {
-              globallyOrderedLinks.push(...links.filter(l => (l.layer || 'top') === layerItem.id));
-            }
+          orderedVisibleLayers.forEach(layerItem => {
+            globallyOrderedLinks.push(...links.filter(l => (l.layer || 'top') === layerItem.id));
           });
-          
-          return globallyOrderedLinks.map((link, globalIndex) => {
+          const linkPaths = {};
+          globallyOrderedLinks.forEach((link, i) => {
+            linkPaths[link.id] = generateLinkPath(link, i, globallyOrderedLinks);
+          });
+
+          const renderLink = (link) => {
             if (link.points.length === 0) return null;
-            const isBottom = (link.layer || 'top') === 'bottom';
-            const pathString = generateLinkPath(link, globalIndex, globallyOrderedLinks);
             const linkLayer = link.layer || 'top';
-            
+            const isBottom = linkLayer === 'bottom';
+            const pathString = linkPaths[link.id];
+
             return (
-              <g 
-                key={link.id} 
+              <g
+                key={link.id}
                 opacity={dimInactiveLayers ? (activeLayerId === linkLayer ? 1 : 0.5) : 1}
                 style={{ pointerEvents: activeLayerId === linkLayer ? 'auto' : 'none' }}
               >
                 {link.points.length > 1 && (
-                  <path 
-                    d={pathString} 
-                    fill="none" 
+                  <path
+                    d={pathString}
+                    fill="none"
                     stroke={isBottom ? 'var(--solder)' : (link.color || 'var(--wire)')}
                     strokeWidth={isBottom ? 10 : 6}
                     strokeLinecap="round"
@@ -528,29 +538,39 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                 ))}
               </g>
             );
+          };
+
+          const renderComp = (comp) => {
+            const compLayerId = comp.layer || 'top';
+            return (
+              <g
+                key={comp.id}
+                opacity={dimInactiveLayers && activeLayerId !== compLayerId ? 0.5 : 1}
+                onMouseDown={(e) => { if (activeTool !== 'link') handleComponentMouseDown(e, comp); }}
+                onClick={(e) => { if (activeTool !== 'link') e.stopPropagation(); }}
+                style={{
+                  cursor: draggedComponent === comp.id ? 'grabbing' : 'grab',
+                  pointerEvents: activeTool === 'link' ? 'none' : 'auto'
+                }}
+              >
+                {renderComponent(comp, activeLayerId, customComponents, selectedComponentIds.includes(comp.id))}
+              </g>
+            );
+          };
+
+          // For each layer (bottom-of-stack first): draw its links, then its
+          // components on top of those links, within the same layer.
+          return orderedVisibleLayers.map(layerItem => {
+            const layerLinks = links.filter(l => (l.layer || 'top') === layerItem.id);
+            const layerComps = components.filter(c => (c.layer || 'top') === layerItem.id);
+            return (
+              <g key={`layer-${layerItem.id}`}>
+                {layerLinks.map(renderLink)}
+                {layerComps.map(renderComp)}
+              </g>
+            );
           });
         })()}
-
-        {/* Drawn Components */}
-        {components.map(comp => {
-          const compLayerId = comp.layer || 'top';
-          const compLayer = layers.find(l => l.id === compLayerId);
-          if (compLayer && compLayer.visible === false) return null;
-          return (
-            <g 
-              key={comp.id}
-              opacity={dimInactiveLayers && activeLayerId !== compLayerId ? 0.5 : 1}
-              onMouseDown={(e) => { if (activeTool !== 'link') handleComponentMouseDown(e, comp); }}
-              onClick={(e) => { if (activeTool !== 'link') e.stopPropagation(); }}
-              style={{ 
-                cursor: draggedComponent === comp.id ? 'grabbing' : 'grab',
-                pointerEvents: activeTool === 'link' ? 'none' : 'auto'
-              }}
-            >
-              {renderComponent(comp, activeLayerId, customComponents, selectedComponentIds.includes(comp.id))}
-            </g>
-          );
-        })}
       </g>
     </svg>
       
