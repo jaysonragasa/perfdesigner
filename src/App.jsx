@@ -16,7 +16,7 @@ import StatusBar from './components/StatusBar';
 // Default status messages shown per active tool. Individual actions can override
 // the status bar via setStatusMessage for more contextual hints.
 const TOOL_STATUS = {
-  select: 'Select and drag components. Hold middle-click to pan, scroll to zoom.',
+  select: 'Select and drag components. Press CTRL+G to create a new component from the selection. Hold middle-click to pan, scroll to zoom.',
   component: 'Click a hole on the board to place the selected component.',
   link: 'Press CTRL+LEFT CLICK to create a new link.'
 };
