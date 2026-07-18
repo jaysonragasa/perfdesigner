@@ -55,3 +55,12 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
    ```
 
 4. Open your browser and navigate to `http://localhost:5173`.
+
+## 📚 Documentation
+
+- [Architecture](docs/ARCHITECTURE.md) – module map, state model, coordinate systems, and
+  how to add features.
+- [Component & Design File Formats](docs/COMPONENT_FORMAT.md) – JSON shapes for placed
+  components, custom definitions, JSON modules, resistor configs, and saved designs.
+- Specs and steering for AI-assisted development live in `.kiro/` (`specs/perfboard-designer`
+  and `steering/`).
