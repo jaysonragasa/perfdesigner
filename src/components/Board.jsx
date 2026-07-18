@@ -138,7 +138,7 @@ export function getComponentPads(comp, customComponents = []) {
   }));
 }
 
-const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, transform, setTransform }) => {
+const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds }) => {
   const svgRef = useRef(null);
   const justDraggedRef = useRef(false);
   
@@ -146,7 +146,6 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const [selectedComponentIds, setSelectedComponentIds] = useState([]);
   const [draggedComponent, setDraggedComponent] = useState(null);
   const [draggedComponentStartPos, setDraggedComponentStartPos] = useState(null);
   const [dragStartLinks, setDragStartLinks] = useState(null);

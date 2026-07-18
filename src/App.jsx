@@ -38,6 +38,8 @@ function App() {
   const [components, setComponents] = useState([]);
   const [links, setLinks] = useState([]);
   const [activeLinkId, setActiveLinkId] = useState(null);
+  const [selectedComponentIds, setSelectedComponentIds] = useState([]);
+  const [clipboard, setClipboard] = useState([]);
 
   // Clear active link if tool changes
   useEffect(() => {
@@ -53,14 +55,74 @@ function App() {
   // Press ESC to end current link
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Don't fire shortcuts when typing in an input/textarea
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
       if (e.key === 'Escape') {
         setActiveLinkId(null);
         if (activeTool === 'component') setActiveTool('select');
+        return;
+      }
+
+      // Copy
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        if (selectedComponentIds.length > 0) {
+          const copied = components.filter(c => selectedComponentIds.includes(c.id));
+          setClipboard(copied);
+        }
+        return;
+      }
+
+      // Cut
+      if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
+        if (selectedComponentIds.length > 0) {
+          const cut = components.filter(c => selectedComponentIds.includes(c.id));
+          setClipboard(cut);
+          setComponents(prev => prev.filter(c => !selectedComponentIds.includes(c.id)));
+          setSelectedComponentIds([]);
+        }
+        return;
+      }
+
+      // Paste
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        if (clipboard.length > 0) {
+          const now = Date.now();
+          const pasted = clipboard.map((c, i) => ({
+            ...c,
+            id: `${now}_${i}`,
+            x: c.x + 2,
+            y: c.y + 2,
+          }));
+          setComponents(prev => [...prev, ...pasted]);
+          setSelectedComponentIds(pasted.map(c => c.id));
+        }
+        return;
+      }
+
+      // Delete
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedComponentIds.length > 0) {
+          setComponents(prev => prev.filter(c => !selectedComponentIds.includes(c.id)));
+          setSelectedComponentIds([]);
+        }
+        return;
+      }
+
+      // Rotate (R)
+      if (e.key === 'r' || e.key === 'R') {
+        if (selectedComponentIds.length > 0) {
+          setComponents(prev => prev.map(c =>
+            selectedComponentIds.includes(c.id)
+              ? { ...c, rotation: (c.rotation || 0) + 90 }
+              : c
+          ));
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTool]);
+  }, [activeTool, selectedComponentIds, components, clipboard]);
 
   const handlePadClick = (x, y, e = null) => {
     const isCtrlClick = e && (e.ctrlKey || e.metaKey);
@@ -326,6 +388,8 @@ function App() {
             onPadClick={handlePadClick}
             activeTool={activeTool}
             customComponents={customComponents}
+            selectedComponentIds={selectedComponentIds}
+            setSelectedComponentIds={setSelectedComponentIds}
             onGroupComponents={(selectedIds) => {
                setShowMacroBuilder(selectedIds);
             }}
