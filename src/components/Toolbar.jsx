@@ -11,7 +11,7 @@ import {
   ZoomOut
 } from 'lucide-react';
 
-const COLORS = ['#10b981', '#ef4444', '#3b82f6', '#f59e0b', '#171717', '#f1f5f9'];
+const COLORS = ['#10b981', '#ef4444', '#3b82f6', '#f59e0b', '#facc15', '#171717', '#f1f5f9'];
 
 const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, setShowComponentCreator, setShowBoardSettings, wireColor, setWireColor, onSaveDesign, onOpenDesign, boardTransform, setBoardTransform }) => {
   return (
