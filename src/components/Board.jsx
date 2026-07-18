@@ -146,10 +146,12 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const [draggedComponent, setDraggedComponent] = useState(null);
-  const [draggedComponentStartPos, setDraggedComponentStartPos] = useState(null);
+  const [draggedComponent, setDraggedComponent] = useState(null); // the anchor component being dragged
+  const [draggedComponentsStartPos, setDraggedComponentsStartPos] = useState(null); // map: id -> {x,y}
+  const [draggedComponentStartPos, setDraggedComponentStartPos] = useState(null); // anchor start pos
   const [dragStartLinks, setDragStartLinks] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const hasDraggedRef = useRef(false);
 
   // Node drag state
   const [draggedNode, setDraggedNode] = useState(null);
@@ -269,18 +271,30 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
       if (draggedComponentStartPos && (snappedX !== draggedComponentStartPos.x || snappedY !== draggedComponentStartPos.y)) {
          const dx = snappedX - draggedComponentStartPos.x;
          const dy = snappedY - draggedComponentStartPos.y;
-         
-         const oldPads = getComponentPads(draggedComponentStartPos, customComponents);
-         
-         setComponents(prev => prev.map(c => 
-           c.id === draggedComponent ? { ...c, x: snappedX, y: snappedY } : c
-         ));
+
+         if (dx !== 0 || dy !== 0) {
+           hasDraggedRef.current = true;
+         }
+
+         // Collect all pads from ALL dragged components
+         const allOldPads = [];
+         if (draggedComponentsStartPos) {
+           Object.values(draggedComponentsStartPos).forEach(startPos => {
+             getComponentPads(startPos, customComponents).forEach(pad => allOldPads.push(pad));
+           });
+         }
+
+         setComponents(prev => prev.map(c => {
+           if (!draggedComponentsStartPos || !draggedComponentsStartPos[c.id]) return c;
+           const start = draggedComponentsStartPos[c.id];
+           return { ...c, x: start.x + dx, y: start.y + dy };
+         }));
          
          if (dragStartLinks) {
            setLinks(dragStartLinks.map(link => {
               let changed = false;
               const newPoints = link.points.map(p => {
-                 if (oldPads.some(pad => pad.x === p.x && pad.y === p.y)) {
+                 if (allOldPads.some(pad => pad.x === p.x && pad.y === p.y)) {
                     changed = true;
                     return { x: p.x + dx, y: p.y + dy };
                  }
@@ -298,7 +312,9 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     setDraggedNode(null);
     setDraggedComponent(null);
     setDraggedComponentStartPos(null);
+    setDraggedComponentsStartPos(null);
     setDragStartLinks(null);
+    hasDraggedRef.current = false;
   };
 
   const handleNodeMouseDown = (e, linkId, pointIndex) => {
@@ -328,18 +344,20 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
   const handleComponentMouseDown = (e, comp) => {
     e.stopPropagation();
     
-    // Select the component
+    // Update selection
+    let newSelection;
     if (e.shiftKey) {
-       setSelectedComponentIds(prev => 
-         prev.includes(comp.id) ? prev.filter(id => id !== comp.id) : [...prev, comp.id]
-       );
+       newSelection = selectedComponentIds.includes(comp.id)
+         ? selectedComponentIds.filter(id => id !== comp.id)
+         : [...selectedComponentIds, comp.id];
     } else {
-       if (!selectedComponentIds.includes(comp.id)) {
-          setSelectedComponentIds([comp.id]);
-       }
+       newSelection = selectedComponentIds.includes(comp.id)
+         ? selectedComponentIds   // keep existing multi-selection
+         : [comp.id];             // start fresh single selection
     }
+    setSelectedComponentIds(newSelection);
     
-    // Compute offset so the component doesn't jump to the top-left
+    // Compute drag offset relative to the clicked component
     const svg = svgRef.current;
     if (svg) {
       const rect = svg.getBoundingClientRect();
@@ -356,7 +374,17 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     
     setDraggedComponent(comp.id);
     setDraggedComponentStartPos({ ...comp });
+
+    // Record start positions of ALL selected (+ clicked) components for multi-drag
+    const dragIds = (selectedComponentIds.includes(comp.id) ? selectedComponentIds : [comp.id]);
+    const startMap = {};
+    components.forEach(c => {
+      if (dragIds.includes(c.id)) startMap[c.id] = { x: c.x, y: c.y };
+    });
+    setDraggedComponentsStartPos(startMap);
+
     setDragStartLinks(links);
+    hasDraggedRef.current = false;
   };
 
   const grid = [];

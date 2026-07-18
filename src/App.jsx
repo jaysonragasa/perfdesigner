@@ -64,6 +64,13 @@ function App() {
         return;
       }
 
+      // Select All
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        setSelectedComponentIds(components.map(c => c.id));
+        return;
+      }
+
       // Copy
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         if (selectedComponentIds.length > 0) {
