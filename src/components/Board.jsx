@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { renderComponent } from './ComponentShapes';
 import { RotateCw, Edit2, Trash2 } from 'lucide-react';
+import { BUILTIN_JSON_COMPONENTS } from '../data/builtinComponents';
 
 const SPACING = 20; // SVG units between holes
 const PAD_OUTER = 12;
@@ -108,8 +109,17 @@ export function getComponentPads(comp, customComponents = []) {
   let localPads = [];
   if (comp.type.startsWith('custom_')) {
     const def = customComponents.find(c => c.id === comp.type);
-    if (def && def.pads) localPads = def.pads;
-  } else if (comp.type === 'resistor') {
+    if (def && def.pads) {
+      localPads = def.pads;
+    } else {
+      const builtin = BUILTIN_JSON_COMPONENTS.find(c => c.id === comp.type || (c.aliases && c.aliases.includes(comp.type)));
+      if (builtin && builtin.def && builtin.def.pads) localPads = builtin.def.pads;
+    }
+  } else {
+    const builtin = BUILTIN_JSON_COMPONENTS.find(c => c.id === comp.type || (c.aliases && c.aliases.includes(comp.type)));
+    if (builtin && builtin.def && builtin.def.pads) {
+      localPads = builtin.def.pads;
+    } else if (comp.type === 'resistor') {
     localPads = [{x: 0, y: 0}, {x: 4, y: 0}];
   } else if (comp.type === 'capacitor' || comp.type === 'electrolytic') {
     const isLarge = comp.params && comp.params.uF >= 1000;
@@ -121,10 +131,11 @@ export function getComponentPads(comp, customComponents = []) {
       localPads.push({x: i, y: 0});
       localPads.push({x: i, y: 3});
     }
-  } else if (comp.type === 'header4' || comp.type === 'male_header') {
-    const pins = comp.params?.pins || 4;
-    for (let i=0; i<pins; i++) {
-      localPads.push({x: i, y: 0});
+    } else if (comp.type === 'header4' || comp.type === 'male_header') {
+      const pins = comp.params?.pins || 4;
+      for (let i=0; i<pins; i++) {
+        localPads.push({x: i, y: 0});
+      }
     }
   }
 

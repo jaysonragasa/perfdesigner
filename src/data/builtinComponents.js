@@ -389,6 +389,174 @@ export const BUILTIN_JSON_COMPONENTS = [
     }
   },
   {
+    "id": "esp32c3sm_breakout",
+    "categoryId": "micro_controllers",
+    "categoryName": "Micro Controllers",
+    "name": "ESP32-C3 SuperMini Breakout",
+    "icon": "🚀",
+    "aliases": ["custom_1792273993725"],
+    "def": {
+      "name": "ESP32-C3 SuperMini Breakout",
+      "hideBody": true,
+      "pads": [
+        { "x": 1, "y": 3 }, { "x": 2, "y": 3 }, { "x": 3, "y": 3 }, { "x": 4, "y": 3 }, { "x": 5, "y": 3 }, { "x": 6, "y": 3 }, { "x": 7, "y": 3 }, { "x": 8, "y": 3 },
+        { "x": 1, "y": 9 }, { "x": 2, "y": 9 }, { "x": 3, "y": 9 }, { "x": 4, "y": 9 }, { "x": 5, "y": 9 }, { "x": 6, "y": 9 }, { "x": 7, "y": 9 }, { "x": 8, "y": 9 },
+        { "x": 1, "y": 0 }, { "x": 1, "y": 1 }, { "x": 1, "y": 2 },
+        { "x": 2, "y": 2 }, { "x": 2, "y": 1 }, { "x": 2, "y": 0 },
+        { "x": 3, "y": 0 }, { "x": 3, "y": 1 }, { "x": 3, "y": 2 },
+        { "x": 1, "y": 12 }, { "x": 2, "y": 12 }, { "x": 3, "y": 12 }, { "x": 4, "y": 12 }, { "x": 5, "y": 12 }, { "x": 6, "y": 12 }, { "x": 7, "y": 12 }, { "x": 8, "y": 12 },
+        { "x": 1, "y": 11 }, { "x": 2, "y": 11 }, { "x": 3, "y": 11 }, { "x": 4, "y": 11 }, { "x": 5, "y": 11 }, { "x": 6, "y": 11 }, { "x": 7, "y": 11 }, { "x": 8, "y": 11 },
+        { "x": 1, "y": 10 }, { "x": 2, "y": 10 }, { "x": 3, "y": 10 }, { "x": 4, "y": 10 }, { "x": 5, "y": 10 }, { "x": 6, "y": 10 }, { "x": 7, "y": 10 }, { "x": 8, "y": 10 },
+        { "x": 4, "y": 0 }, { "x": 5, "y": 0 }, { "x": 6, "y": 0 }, { "x": 7, "y": 0 }, { "x": 8, "y": 0 },
+        { "x": 4, "y": 1 }, { "x": 5, "y": 1 }, { "x": 6, "y": 1 }, { "x": 7, "y": 1 }, { "x": 8, "y": 1 },
+        { "x": 4, "y": 2 }, { "x": 5, "y": 2 }, { "x": 6, "y": 2 }, { "x": 7, "y": 2 }, { "x": 8, "y": 2 }
+      ],
+      "width": 9,
+      "height": 13,
+      "bodyWidth": 9,
+      "bodyHeight": 13,
+      "childComponents": [
+        {
+          "id": "1792273677089",
+          "type": "esp32c3_supermini",
+          "x": 0,
+          "y": 3,
+          "layer": "top",
+          "rotation": 0,
+          "width": null,
+          "height": null,
+          "params": null
+        },
+        {
+          "id": "1792273708859",
+          "type": "male_header",
+          "x": 1,
+          "y": 0,
+          "layer": "top",
+          "rotation": 90,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 3,
+            "baseColor": "#ff0000"
+          }
+        },
+        {
+          "id": "1792273737045",
+          "type": "male_header",
+          "x": 2,
+          "y": 2,
+          "layer": "top",
+          "rotation": 270,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 3,
+            "baseColor": "#111111"
+          }
+        },
+        {
+          "id": "1792273750953",
+          "type": "male_header",
+          "x": 3,
+          "y": 0,
+          "layer": "top",
+          "rotation": 90,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 3,
+            "baseColor": "#00ff11"
+          }
+        },
+        {
+          "id": "1792273813508",
+          "type": "male_header",
+          "x": 1,
+          "y": 12,
+          "layer": "top",
+          "rotation": 0,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 8,
+            "baseColor": "#111111"
+          }
+        },
+        {
+          "id": "1792273826541",
+          "type": "male_header",
+          "x": 1,
+          "y": 11,
+          "layer": "top",
+          "rotation": 0,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 8,
+            "baseColor": "#ff0000"
+          }
+        },
+        {
+          "id": "1792273838594",
+          "type": "male_header",
+          "x": 1,
+          "y": 10,
+          "layer": "top",
+          "rotation": 0,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 8,
+            "baseColor": "#e1ff00"
+          }
+        },
+        {
+          "id": "1792273848524",
+          "type": "male_header",
+          "x": 4,
+          "y": 0,
+          "layer": "top",
+          "rotation": 0,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 5,
+            "baseColor": "#111111"
+          }
+        },
+        {
+          "id": "1792273856865",
+          "type": "male_header",
+          "x": 4,
+          "y": 1,
+          "layer": "top",
+          "rotation": 0,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 5,
+            "baseColor": "#ff0000"
+          }
+        },
+        {
+          "id": "1792273874458",
+          "type": "male_header",
+          "x": 4,
+          "y": 2,
+          "layer": "top",
+          "rotation": 0,
+          "width": null,
+          "height": null,
+          "params": {
+            "pins": 5,
+            "baseColor": "#fff700"
+          }
+        }
+      ]
+    }
+  },
+  {
     "id": "inmp441_microphone",
     "categoryId": "audio",
     "categoryName": "Audio",

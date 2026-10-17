@@ -275,7 +275,9 @@ export const renderComponent = (comp, layer, customComponents = [], isSelected =
   
   if (comp.type.startsWith('custom_')) {
     const def = customComponents.find(c => c.id === comp.type);
-    return <CustomShape {...props} def={def} customComponents={customComponents} />;
+    if (def) return <CustomShape {...props} def={def} customComponents={customComponents} />;
+    const builtinFallback = BUILTIN_JSON_COMPONENTS.find(c => c.id === comp.type || (c.aliases && c.aliases.includes(comp.type)));
+    if (builtinFallback) return <CustomShape {...props} def={builtinFallback.def} customComponents={customComponents} />;
   }
 
   if (comp.type.startsWith('saved_resistor_')) {
@@ -292,8 +294,8 @@ export const renderComponent = (comp, layer, customComponents = [], isSelected =
     case 'header4': return <Header {...props} />;
     case 'male_header': return <MaleHeader {...props} />;
     default: 
-      const builtin = BUILTIN_JSON_COMPONENTS.find(c => c.id === comp.type);
-      if (builtin) return <CustomShape {...props} def={builtin.def} />;
+      const builtin = BUILTIN_JSON_COMPONENTS.find(c => c.id === comp.type || (c.aliases && c.aliases.includes(comp.type)));
+      if (builtin) return <CustomShape {...props} def={builtin.def} customComponents={customComponents} />;
       return null;
   }
 };
