@@ -461,7 +461,7 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
                     setTexts(prev => prev.map((t, i) => i === selectedTextIndex ? { ...t, size: numVal } : t));
                  }
               }}
-              style={{ width: '85px' }} 
+              style={{ width: '95px' }} 
             />
 
             <div style={{ width: '1px', height: '20px', background: 'var(--border-subtle)', margin: '0 4px' }}></div>
@@ -495,7 +495,7 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
               value={newRotation}
               onChange={val => handleSetRotation(val)}
               disabled={selectedTextIndex === null}
-              style={{ width: '85px' }} 
+              style={{ width: '90px' }} 
             />
             
             <div style={{ width: '1px', height: '20px', background: 'var(--border-subtle)', margin: '0 4px' }}></div>

@@ -54,7 +54,8 @@ const NumberInput = ({ value, onChange, min, max, step = 1, style = {}, disabled
         disabled={disabled}
         onClick={handleDecrement}
         style={{
-          width: '32px',
+          width: '24px',
+          minWidth: '24px',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
@@ -62,12 +63,13 @@ const NumberInput = ({ value, onChange, min, max, step = 1, style = {}, disabled
           color: 'var(--text-muted)',
           background: 'rgba(255,255,255,0.05)',
           borderRight: '1px solid var(--border-subtle)',
-          cursor: disabled ? 'not-allowed' : 'pointer'
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          padding: 0
         }}
         onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-main)'; } }}
         onMouseLeave={(e) => { if (!disabled) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
       >
-        <Minus size={14} />
+        <Minus size={13} />
       </button>
       
       <input 
@@ -79,11 +81,12 @@ const NumberInput = ({ value, onChange, min, max, step = 1, style = {}, disabled
         style={{
           flex: 1,
           width: '100%',
+          minWidth: 0,
           background: 'transparent',
           border: 'none',
           color: 'white',
           textAlign: 'center',
-          padding: '0 8px',
+          padding: '0 4px',
           outline: 'none',
           fontFamily: 'inherit',
           fontSize: '13px',
@@ -95,7 +98,8 @@ const NumberInput = ({ value, onChange, min, max, step = 1, style = {}, disabled
         disabled={disabled}
         onClick={handleIncrement}
         style={{
-          width: '32px',
+          width: '24px',
+          minWidth: '24px',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
@@ -103,12 +107,13 @@ const NumberInput = ({ value, onChange, min, max, step = 1, style = {}, disabled
           color: 'var(--text-muted)',
           background: 'rgba(255,255,255,0.05)',
           borderLeft: '1px solid var(--border-subtle)',
-          cursor: disabled ? 'not-allowed' : 'pointer'
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          padding: 0
         }}
         onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--text-main)'; } }}
         onMouseLeave={(e) => { if (!disabled) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
       >
-        <Plus size={14} />
+        <Plus size={13} />
       </button>
     </div>
   );
