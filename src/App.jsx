@@ -22,15 +22,31 @@ const TOOL_STATUS = {
   link: 'Press CTRL+LEFT CLICK to create a new link.'
 };
 
+const AUTOSAVE_KEY = 'perfdesigner_autosave_session';
+
+const loadSavedSession = () => {
+  try {
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.warn('Failed to load auto-saved session:', err);
+  }
+  return null;
+};
+
 function App() {
-  const [layers, setLayers] = useState([
+  const [savedSession] = useState(() => loadSavedSession());
+
+  const [layers, setLayers] = useState(() => savedSession?.layers || [
     { id: 'top', name: 'Top Layer', visible: true },
     { id: 'bottom', name: 'Bottom Layer', visible: true }
   ]);
-  const [activeLayerId, setActiveLayerId] = useState('top');
-  const [showGoldBorder, setShowGoldBorder] = useState(true);
-  const [dimInactiveLayers, setDimInactiveLayers] = useState(true);
-  const [boardColor, setBoardColor] = useState('#142e1d');
+  const [activeLayerId, setActiveLayerId] = useState(() => savedSession?.activeLayerId || 'top');
+  const [showGoldBorder, setShowGoldBorder] = useState(() => savedSession?.showGoldBorder !== undefined ? savedSession.showGoldBorder : true);
+  const [dimInactiveLayers, setDimInactiveLayers] = useState(() => savedSession?.dimInactiveLayers !== undefined ? savedSession.dimInactiveLayers : true);
+  const [boardColor, setBoardColor] = useState(() => savedSession?.boardColor || '#142e1d');
   const [activeTool, setActiveTool] = useState('select'); // 'select', 'component', 'link'
   const [selectedComponentType, setSelectedComponentType] = useState(null);
   const [showComponentCreator, setShowComponentCreator] = useState(false);
@@ -38,19 +54,60 @@ function App() {
   const [showComponentParams, setShowComponentParams] = useState(null);
   const [pendingComponentParams, setPendingComponentParams] = useState(null);
   const [showMacroBuilder, setShowMacroBuilder] = useState(null);
-  const [customComponents, setCustomComponents] = useState([]);
-  const [wireColor, setWireColor] = useState('#10b981'); // Default to green wire
+  const [customComponents, setCustomComponents] = useState(() => savedSession?.customComponents || []);
+  const [wireColor, setWireColor] = useState(() => savedSession?.wireColor || '#10b981'); // Default to green wire
   const [statusMessage, setStatusMessage] = useState(TOOL_STATUS.select);
   
   // Board Data
-  const [boardSize, setBoardSize] = useState({ width: 32, height: 22 });
-  const [boardTransform, setBoardTransform] = useState({ x: 50, y: 50, scale: 1 });
+  const [boardSize, setBoardSize] = useState(() => savedSession?.boardSize || { width: 32, height: 22 });
+  const [boardTransform, setBoardTransform] = useState(() => savedSession?.boardTransform || { x: 50, y: 50, scale: 1 });
   
-  const [components, setComponents] = useState([]);
-  const [links, setLinks] = useState([]);
+  const [components, setComponents] = useState(() => savedSession?.components || []);
+  const [links, setLinks] = useState(() => savedSession?.links || []);
   const [activeLinkId, setActiveLinkId] = useState(null);
   const [selectedComponentIds, setSelectedComponentIds] = useState([]);
   const [clipboard, setClipboard] = useState([]);
+
+  // Auto-save session to localStorage
+  useEffect(() => {
+    const sessionData = {
+      components,
+      links,
+      customComponents,
+      boardSize,
+      layers,
+      activeLayerId,
+      boardColor,
+      showGoldBorder,
+      dimInactiveLayers,
+      wireColor,
+      boardTransform,
+      updatedAt: Date.now()
+    };
+
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(sessionData));
+      } catch (err) {
+        console.warn('AutoSave to localStorage failed:', err);
+      }
+    }, 400);
+
+    const handleBeforeUnload = () => {
+      try {
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(sessionData));
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [components, links, customComponents, boardSize, layers, activeLayerId, boardColor, showGoldBorder, dimInactiveLayers, wireColor, boardTransform]);
 
   // Clear active link if tool changes
   useEffect(() => {
@@ -233,6 +290,17 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handleNewDesign = () => {
+    if (window.confirm('Start a new design? Make sure you have exported your current design if needed.')) {
+      setComponents([]);
+      setLinks([]);
+      setBoardSize({ width: 32, height: 22 });
+      setSelectedComponentIds([]);
+      setActiveLinkId(null);
+      setBoardTransform({ x: 50, y: 50, scale: 1 });
+    }
+  };
+
   const handleOpenDesign = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -380,6 +448,7 @@ function App() {
         setWireColor={setWireColor}
         onSaveDesign={handleSaveDesign}
         onOpenDesign={handleOpenDesign}
+        onNewDesign={handleNewDesign}
         boardTransform={boardTransform}
         setBoardTransform={setBoardTransform}
       />
