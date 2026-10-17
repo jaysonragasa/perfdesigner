@@ -191,8 +191,9 @@ function App() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't fire shortcuts when typing in an input/textarea
+      // Don't fire shortcuts when typing in an input/textarea or when a modal is open
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (showComponentCreator || showBoardSettings || showComponentParams || showMacroBuilder) return;
 
       if (e.key === 'Escape') {
         setActiveLinkId(null);
@@ -282,7 +283,7 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTool, selectedComponentIds, components, clipboard, customComponents]);
+  }, [activeTool, selectedComponentIds, components, clipboard, customComponents, showComponentCreator, showBoardSettings, showComponentParams, showMacroBuilder]);
 
   const handlePadClick = (x, y, e = null) => {
     const isCtrlClick = e && (e.ctrlKey || e.metaKey);

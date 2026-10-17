@@ -243,14 +243,43 @@ export const CustomShape = ({ x, y, layer, rotation = 0, def, isSelected, custom
       ))}
       
       {/* Label (Legacy) */}
-      {def.label && def.labelPos && (
-        <text x={def.labelPos.x * SPACING} y={def.labelPos.y * SPACING} fill="white" fontSize="12" textAnchor="middle" dominantBaseline="central" pointerEvents="none">{def.label}</text>
-      )}
+      {def.label && def.labelPos && (() => {
+        const rot = def.labelRotation !== undefined ? def.labelRotation : (def.labelRot || 0);
+        return (
+          <text 
+            x={def.labelPos.x * SPACING} 
+            y={def.labelPos.y * SPACING} 
+            fill="white" 
+            fontSize="12" 
+            textAnchor="middle" 
+            dominantBaseline="central" 
+            pointerEvents="none"
+            transform={rot ? `rotate(${rot}, ${def.labelPos.x * SPACING}, ${def.labelPos.y * SPACING})` : undefined}
+          >
+            {def.label}
+          </text>
+        );
+      })()}
       
       {/* Custom Texts */}
-      {def.texts && def.texts.map((t, i) => (
-        <text key={`text-${i}`} x={t.x * SPACING} y={t.y * SPACING} fill="white" fontSize={t.size || 25} textAnchor="middle" dominantBaseline="central" pointerEvents="none">{t.text}</text>
-      ))}
+      {def.texts && def.texts.map((t, i) => {
+        const rot = t.rotation !== undefined ? t.rotation : (t.rot || 0);
+        return (
+          <text 
+            key={`text-${i}`} 
+            x={t.x * SPACING} 
+            y={t.y * SPACING} 
+            fill="white" 
+            fontSize={t.size || 25} 
+            textAnchor="middle" 
+            dominantBaseline="central" 
+            pointerEvents="none"
+            transform={rot ? `rotate(${rot}, ${t.x * SPACING}, ${t.y * SPACING})` : undefined}
+          >
+            {t.text}
+          </text>
+        );
+      })}
 
       {/* Nested Components */}
       {def.childComponents && def.childComponents.map((child, i) => (

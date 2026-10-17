@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ZoomIn, ZoomOut, Save, Download, Upload } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, Save, Download, Upload, RotateCw } from 'lucide-react';
 import NumberInput from './NumberInput';
 import { renderComponent } from './ComponentShapes';
 
@@ -15,12 +15,19 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
   const [texts, setTexts] = useState(() => {
     const initialTexts = editingDef && editingDef.texts ? [...editingDef.texts] : [];
     if (editingDef && editingDef.label) {
-      initialTexts.push({ text: editingDef.label, x: editingDef.labelPos?.x || 2, y: editingDef.labelPos?.y || 1.5, size: 12 });
+      initialTexts.push({ 
+        text: editingDef.label, 
+        x: editingDef.labelPos?.x || 2, 
+        y: editingDef.labelPos?.y || 1.5, 
+        size: 12,
+        rotation: editingDef.labelRotation || 0
+      });
     }
     return initialTexts;
   });
   const [newText, setNewText] = useState('');
   const [newFontSize, setNewFontSize] = useState(25);
+  const [newRotation, setNewRotation] = useState(0);
   const [selectedTextIndex, setSelectedTextIndex] = useState(null);
   const [zoom, setZoom] = useState(1);
   const [childComponents, setChildComponents] = useState(editingDef ? (editingDef.childComponents || []) : []);
@@ -116,6 +123,41 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
   const handleMouseUp = () => {
     setDraggingTextIndex(null);
   };
+
+  const handleRotateSelectedText = (delta = 90) => {
+    if (selectedTextIndex === null || !texts[selectedTextIndex]) return;
+    const currentRot = texts[selectedTextIndex].rotation || 0;
+    const nextRot = (((currentRot + delta) % 360) + 360) % 360;
+    setNewRotation(nextRot);
+    setTexts(prev => prev.map((t, i) => i === selectedTextIndex ? { ...t, rotation: nextRot } : t));
+  };
+
+  const handleSetRotation = (rotVal) => {
+    const num = ((parseInt(rotVal, 10) || 0) % 360 + 360) % 360;
+    setNewRotation(num);
+    if (selectedTextIndex !== null && texts[selectedTextIndex]) {
+      setTexts(prev => prev.map((t, i) => i === selectedTextIndex ? { ...t, rotation: num } : t));
+    }
+  };
+
+  // Keyboard shortcut to rotate (R) or delete (Delete/Backspace) selected text
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (selectedTextIndex === null || !texts[selectedTextIndex]) return;
+
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        handleRotateSelectedText(90);
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        setTexts(prev => prev.filter((_, i) => i !== selectedTextIndex));
+        setSelectedTextIndex(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedTextIndex, texts]);
 
   // Modal dragging
   const [isDraggingModal, setIsDraggingModal] = useState(false);
@@ -255,7 +297,13 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
         
         let importedTexts = data.texts ? [...data.texts] : [];
         if (data.label) {
-           importedTexts.push({ text: data.label, x: data.labelPos?.x || 2, y: data.labelPos?.y || 1.5, size: 12 });
+           importedTexts.push({ 
+             text: data.label, 
+             x: data.labelPos?.x || 2, 
+             y: data.labelPos?.y || 1.5, 
+             size: 12,
+             rotation: data.labelRotation || 0
+           });
         }
         setTexts(importedTexts);
         
@@ -379,7 +427,7 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
             <button 
               title="Add New Text"
               onClick={() => {
-                 setTexts(prev => [...prev, { text: newText || 'Text', size: newFontSize || 25, x: (cols-1) / 2, y: (rows-1) / 2 }]);
+                 setTexts(prev => [...prev, { text: newText || 'Text', size: newFontSize || 25, rotation: newRotation || 0, x: (cols-1) / 2, y: (rows-1) / 2 }]);
                  setSelectedTextIndex(texts.length); // will be the new index
               }}
               style={{ background: 'var(--bg-secondary)', color: 'white', border: '1px solid var(--border-subtle)', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}
@@ -399,7 +447,7 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
                  }
               }}
               placeholder="Text" 
-              style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', padding: '6px 8px', color: 'white', borderRadius: '4px', outline: 'none', boxSizing: 'border-box', fontSize: '12px' }} 
+              style={{ flex: 1, minWidth: '80px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', padding: '6px 8px', color: 'white', borderRadius: '4px', outline: 'none', boxSizing: 'border-box', fontSize: '12px' }} 
             />
             
             <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Size:</label>
@@ -413,7 +461,41 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
                     setTexts(prev => prev.map((t, i) => i === selectedTextIndex ? { ...t, size: numVal } : t));
                  }
               }}
-              style={{ width: '120px' }} 
+              style={{ width: '85px' }} 
+            />
+
+            <div style={{ width: '1px', height: '20px', background: 'var(--border-subtle)', margin: '0 4px' }}></div>
+
+            {/* Rotate Button and Angle Input */}
+            <button
+              title="Rotate Selected Label 90° (R)"
+              disabled={selectedTextIndex === null}
+              onClick={() => handleRotateSelectedText(90)}
+              style={{
+                background: selectedTextIndex !== null ? 'var(--bg-secondary)' : 'rgba(255,255,255,0.03)',
+                color: selectedTextIndex !== null ? 'white' : 'var(--text-muted)',
+                border: '1px solid var(--border-subtle)',
+                padding: '6px 8px',
+                borderRadius: '4px',
+                cursor: selectedTextIndex !== null ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                height: '35px'
+              }}
+            >
+              <RotateCw size={14} />
+              <span style={{ fontSize: '11px', fontWeight: '600' }}>
+                {selectedTextIndex !== null && texts[selectedTextIndex] ? `${texts[selectedTextIndex].rotation || 0}°` : '0°'}
+              </span>
+            </button>
+
+            <NumberInput 
+              min={0} max={360} step={90}
+              value={newRotation}
+              onChange={val => handleSetRotation(val)}
+              disabled={selectedTextIndex === null}
+              style={{ width: '85px' }} 
             />
             
             <div style={{ width: '1px', height: '20px', background: 'var(--border-subtle)', margin: '0 4px' }}></div>
@@ -489,27 +571,95 @@ const ComponentCreator = ({ onClose, onSave, editingDef, customComponents = [], 
                 ))}
                 
                 {/* Draggable Custom Texts */}
-                {texts.map((t, index) => (
-                  <g 
-                    key={index}
-                    transform={`translate(${t.x * 20}, ${t.y * 20})`}
-                     onMouseDown={(e) => {
-                       handleTextMouseDown(e, index);
-                       setSelectedTextIndex(index);
-                       setNewText(t.text);
-                       setNewFontSize(t.size || 25);
-                    }}
-                    onContextMenu={(e) => {
-                       e.preventDefault();
-                       setTexts(prev => prev.filter((_, i) => i !== index));
-                       if (selectedTextIndex === index) setSelectedTextIndex(null);
-                    }}
-                    style={{ cursor: 'move' }}
-                  >
-                    <text x="0" y="0" fill={selectedTextIndex === index ? 'var(--accent)' : 'white'} fontSize={t.size || 25} textAnchor="middle" dominantBaseline="central" pointerEvents="none">{t.text}</text>
-                    <rect x="-10" y="-10" width="20" height="20" fill="transparent" />
-                  </g>
-                ))}
+                {texts.map((t, index) => {
+                  const isSelected = selectedTextIndex === index;
+                  const rot = t.rotation || 0;
+                  const fontSize = t.size || 25;
+                  const estWidth = Math.max(20, (t.text || '').length * fontSize * 0.6);
+                  const estHeight = Math.max(16, fontSize);
+
+                  return (
+                    <g 
+                      key={index}
+                      transform={`translate(${t.x * 20}, ${t.y * 20}) rotate(${rot})`}
+                      onMouseDown={(e) => {
+                        handleTextMouseDown(e, index);
+                        setSelectedTextIndex(index);
+                        setNewText(t.text);
+                        setNewFontSize(fontSize);
+                        setNewRotation(rot);
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setTexts(prev => prev.filter((_, i) => i !== index));
+                        if (selectedTextIndex === index) setSelectedTextIndex(null);
+                      }}
+                      style={{ cursor: 'move' }}
+                    >
+                      {/* Selection Box when selected */}
+                      {isSelected && (
+                        <rect 
+                          x={-estWidth / 2 - 4} 
+                          y={-estHeight / 2 - 4} 
+                          width={estWidth + 8} 
+                          height={estHeight + 8} 
+                          fill="rgba(59, 130, 246, 0.15)" 
+                          stroke="var(--accent)" 
+                          strokeWidth="1.5" 
+                          strokeDasharray="4 2" 
+                          rx="3" 
+                        />
+                      )}
+
+                      {/* Text */}
+                      <text 
+                        x="0" 
+                        y="0" 
+                        fill={isSelected ? 'var(--accent)' : 'white'} 
+                        fontSize={fontSize} 
+                        textAnchor="middle" 
+                        dominantBaseline="central" 
+                        pointerEvents="none"
+                        style={{ userSelect: 'none' }}
+                      >
+                        {t.text}
+                      </text>
+
+                      {/* Hit target */}
+                      <rect 
+                        x={-estWidth / 2 - 4} 
+                        y={-estHeight / 2 - 4} 
+                        width={estWidth + 8} 
+                        height={estHeight + 8} 
+                        fill="transparent" 
+                      />
+
+                      {/* Quick Rotate Handle icon above selected text */}
+                      {isSelected && (
+                        <g 
+                          transform={`translate(0, ${-estHeight / 2 - 16})`}
+                          style={{ cursor: 'pointer' }}
+                          title="Click to rotate 90° (R)"
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            handleRotateSelectedText(90);
+                          }}
+                        >
+                          <line x1="0" y1="4" x2="0" y2="10" stroke="var(--accent)" strokeWidth="1" strokeDasharray="2 1" />
+                          <circle cx="0" cy="0" r="8" fill="#1e293b" stroke="var(--accent)" strokeWidth="1.5" />
+                          <path 
+                            d="M -3 -2 A 4 4 0 1 1 -2 3 M -5 0 L -2 3 L 1 0" 
+                            fill="none" 
+                            stroke="white" 
+                            strokeWidth="1.2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                          />
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
               </g>
             </svg>
           </div>
