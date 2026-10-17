@@ -12,6 +12,7 @@ import MacroBuilderModal from './components/MacroBuilderModal';
 
 import LayersPanel from './components/LayersPanel';
 import StatusBar from './components/StatusBar';
+import BoardInfoPanel from './components/BoardInfoPanel';
 
 // Default status messages shown per active tool. Individual actions can override
 // the status bar via setStatusMessage for more contextual hints.
@@ -427,6 +428,14 @@ function App() {
                 setShowComponentParams({ type: comp.type, editingId: comp.id, params: comp.params });
               }
             }}
+            onResizeBoard={(newSize) => setBoardSize(newSize)}
+          />
+          <BoardInfoPanel 
+            boardSize={boardSize}
+            onResizeBoard={(newSize) => setBoardSize(newSize)}
+            componentsCount={components.length}
+            linksCount={links.length}
+            onOpenSettings={() => setShowBoardSettings(true)}
           />
             <div style={{ position: 'absolute', bottom: '20px', right: '20px', display: 'flex', gap: '8px', background: 'var(--bg-panel)', padding: '8px', borderRadius: '8px', backdropFilter: 'blur(10px)', border: '1px solid var(--border-subtle)', zIndex: 10 }}>
               <button 

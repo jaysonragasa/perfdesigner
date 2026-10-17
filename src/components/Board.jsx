@@ -149,7 +149,7 @@ export function getComponentPads(comp, customComponents = []) {
   }));
 }
 
-const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds }) => {
+const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds, onResizeBoard }) => {
   const svgRef = useRef(null);
   const justDraggedRef = useRef(false);
   
@@ -167,8 +167,53 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
   // Node drag state
   const [draggedNode, setDraggedNode] = useState(null);
 
+  // Board Resize state
+  const [isResizingBoard, setIsResizingBoard] = useState(false);
+  const [resizingHandle, setResizingHandle] = useState(null); // 'corner', 'right', 'bottom'
+
   const boardPxWidth = width * SPACING;
   const boardPxHeight = height * SPACING;
+
+  const handleResizeMouseDown = (e, handleType) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    setIsResizingBoard(true);
+    setResizingHandle(handleType);
+
+    const handlePointerMove = (moveEvent) => {
+      if (!svgRef.current) return;
+      const rect = svgRef.current.getBoundingClientRect();
+      const mouseCanvasX = (moveEvent.clientX - rect.left - transform.x) / transform.scale;
+      const mouseCanvasY = (moveEvent.clientY - rect.top - transform.y) / transform.scale;
+
+      let newWidth = width;
+      let newHeight = height;
+
+      if (handleType === 'corner' || handleType === 'right') {
+        const targetCols = Math.round((mouseCanvasX + SPACING / 2) / SPACING);
+        newWidth = Math.max(5, Math.min(150, targetCols));
+      }
+      if (handleType === 'corner' || handleType === 'bottom') {
+        const targetRows = Math.round((mouseCanvasY + SPACING / 2) / SPACING);
+        newHeight = Math.max(5, Math.min(150, targetRows));
+      }
+
+      if (onResizeBoard) {
+        onResizeBoard({ width: newWidth, height: newHeight });
+      }
+    };
+
+    const handlePointerUp = () => {
+      setIsResizingBoard(false);
+      setResizingHandle(null);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+  };
 
   // Handle Pan and Zoom
   useEffect(() => {
@@ -581,6 +626,109 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
               </g>
             );
           });
+        })()}
+
+        {/* Floating Board Resize Grips */}
+        {onResizeBoard && (() => {
+          const brX = boardPxWidth - SPACING / 2;
+          const brY = boardPxHeight - SPACING / 2;
+          const midY = (boardPxHeight - SPACING) / 2;
+          const midX = (boardPxWidth - SPACING) / 2;
+
+          return (
+            <g className="board-resize-controls" style={{ userSelect: 'none' }}>
+              {/* Right Edge Grip */}
+              <g
+                transform={`translate(${brX}, ${midY})`}
+                style={{ cursor: 'ew-resize' }}
+                onMouseDown={(e) => handleResizeMouseDown(e, 'right')}
+              >
+                <title>Drag to resize board width</title>
+                <rect x="-6" y="-16" width="14" height="32" fill="transparent" />
+                <rect
+                  x="-3"
+                  y="-12"
+                  width="7"
+                  height="24"
+                  rx="3.5"
+                  fill={isResizingBoard && resizingHandle === 'right' ? 'var(--accent)' : '#1e293b'}
+                  stroke="var(--accent)"
+                  strokeWidth="1.5"
+                  style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}
+                />
+                <line x1="0.5" y1="-6" x2="0.5" y2="6" stroke={isResizingBoard && resizingHandle === 'right' ? '#fff' : 'rgba(255,255,255,0.7)'} strokeWidth="1.5" strokeLinecap="round" />
+              </g>
+
+              {/* Bottom Edge Grip */}
+              <g
+                transform={`translate(${midX}, ${brY})`}
+                style={{ cursor: 'ns-resize' }}
+                onMouseDown={(e) => handleResizeMouseDown(e, 'bottom')}
+              >
+                <title>Drag to resize board height</title>
+                <rect x="-16" y="-6" width="32" height="14" fill="transparent" />
+                <rect
+                  x="-12"
+                  y="-3"
+                  width="24"
+                  height="7"
+                  rx="3.5"
+                  fill={isResizingBoard && resizingHandle === 'bottom' ? 'var(--accent)' : '#1e293b'}
+                  stroke="var(--accent)"
+                  strokeWidth="1.5"
+                  style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}
+                />
+                <line x1="-6" y1="0.5" x2="6" y2="0.5" stroke={isResizingBoard && resizingHandle === 'bottom' ? '#fff' : 'rgba(255,255,255,0.7)'} strokeWidth="1.5" strokeLinecap="round" />
+              </g>
+
+              {/* Corner Floating Resize Grip */}
+              <g
+                transform={`translate(${brX}, ${brY})`}
+                style={{ cursor: 'nwse-resize' }}
+                onMouseDown={(e) => handleResizeMouseDown(e, 'corner')}
+              >
+                <title>Drag to resize board (width & height)</title>
+                <circle cx="6" cy="6" r="22" fill="transparent" />
+                <rect
+                  x="-2"
+                  y="-2"
+                  width="20"
+                  height="20"
+                  rx="5"
+                  fill={isResizingBoard && resizingHandle === 'corner' ? 'var(--accent)' : '#1e293b'}
+                  stroke="var(--accent)"
+                  strokeWidth="1.5"
+                  style={{ filter: 'drop-shadow(0 3px 10px rgba(0,0,0,0.6))' }}
+                />
+                <line x1="4" y1="14" x2="14" y2="4" stroke={isResizingBoard && resizingHandle === 'corner' ? '#fff' : 'var(--accent)'} strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="8" y1="14" x2="14" y2="8" stroke={isResizingBoard && resizingHandle === 'corner' ? '#fff' : 'var(--accent)'} strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="12" y1="14" x2="14" y2="12" stroke={isResizingBoard && resizingHandle === 'corner' ? '#fff' : 'var(--accent)'} strokeWidth="1.5" strokeLinecap="round" />
+              </g>
+
+              {/* Live Floating Dimension Badge while resizing */}
+              {isResizingBoard && (
+                <g transform={`translate(${brX + 26}, ${brY + 12})`} style={{ pointerEvents: 'none' }}>
+                  <rect
+                    x="0"
+                    y="-14"
+                    width="170"
+                    height="36"
+                    rx="8"
+                    fill="rgba(15, 23, 42, 0.95)"
+                    stroke="var(--accent)"
+                    strokeWidth="1.5"
+                    style={{ filter: 'drop-shadow(0 6px 20px rgba(0,0,0,0.6))' }}
+                  />
+                  <text x="85" y="-1" fill="#fff" fontSize="12" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
+                    {width} × {height} holes
+                  </text>
+                  <text x="85" y="11" fill="var(--text-muted)" fontSize="10" textAnchor="middle" dominantBaseline="middle">
+                    {(width * 2.54).toFixed(1)} × {(height * 2.54).toFixed(1)} mm
+                  </text>
+                </g>
+              )}
+            </g>
+          );
         })()}
       </g>
     </svg>
