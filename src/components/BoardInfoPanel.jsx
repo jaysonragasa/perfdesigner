@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Grid, Plus, Minus, Sliders } from 'lucide-react';
 
 const PRESET_SIZES = [
@@ -16,7 +16,22 @@ const BoardInfoPanel = ({
   linksCount = 0,
   onOpenSettings 
 }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    try {
+      const saved = localStorage.getItem('perfboard_details_expanded');
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('perfboard_details_expanded', JSON.stringify(isExpanded));
+    } catch {
+      // ignore localStorage quota/disabled exceptions
+    }
+  }, [isExpanded]);
 
   const widthHoles = boardSize.width;
   const heightHoles = boardSize.height;
