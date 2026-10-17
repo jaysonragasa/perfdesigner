@@ -548,7 +548,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                   <path
                     d={pathString}
                     fill="none"
-                    stroke={isBottom ? 'var(--solder)' : (link.color || 'var(--wire)')}
+                    stroke={link.color || (isBottom ? 'var(--solder)' : 'var(--wire)')}
                     strokeWidth={isBottom ? 10 : 6}
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -576,7 +576,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                     <circle
                       r={isBottom ? 6 : 4}
                       fill={isBottom ? 'var(--solder-hover)' : '#fff'}
-                      stroke={isBottom ? 'var(--solder)' : 'var(--wire)'}
+                      stroke={link.color || (isBottom ? 'var(--solder)' : 'var(--wire)')}
                       strokeWidth="2"
                     />
                   </g>

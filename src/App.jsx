@@ -336,7 +336,7 @@ function App() {
           newLinks.push({
             id: newId,
             layer: activeLayerId, // The layer it was started on
-            color: activeLayerId === 'top' ? wireColor : (layers.find(l => l.id === activeLayerId)?.color || wireColor),
+            color: wireColor,
             points: [{ x, y }]
           });
           setActiveLinkId(newId);
@@ -531,6 +531,8 @@ function App() {
         onNewDesign={handleNewDesign}
         boardTransform={boardTransform}
         setBoardTransform={setBoardTransform}
+        setLinks={setLinks}
+        activeLinkId={activeLinkId}
       />
       <div className="main-area">
         <Sidebar 

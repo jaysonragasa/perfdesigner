@@ -15,7 +15,7 @@ import {
 // Order: Black, Red, Orange, Yellow, Brown, Violet, Green, White
 const COLORS = ['#171717', '#ef4444', '#f59e0b', '#facc15', '#8B4513', '#8b5cf6', '#10b981', '#f1f5f9'];
 
-const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, setShowComponentCreator, setShowBoardSettings, wireColor, setWireColor, onSaveDesign, onOpenDesign, onNewDesign, boardTransform, setBoardTransform }) => {
+const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, setShowComponentCreator, setShowBoardSettings, wireColor, setWireColor, onSaveDesign, onOpenDesign, onNewDesign, boardTransform, setBoardTransform, setLinks, activeLinkId }) => {
   return (
     <div className="toolbar">
       <div className="toolbar-group">
@@ -50,26 +50,45 @@ const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, se
           <span>Create Links</span>
         </button>
 
-        {activeTool === 'link' && activeLayerId !== 'bottom' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '8px', padding: '4px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px' }}>
-            {COLORS.map(c => (
-              <div 
-                key={c}
-                onClick={() => setWireColor && setWireColor(c)}
-                style={{ 
-                  width: '18px', 
-                  height: '18px', 
-                  borderRadius: '50%', 
-                  background: c, 
-                  cursor: 'pointer',
-                  border: wireColor === c ? '2px solid white' : '1px solid rgba(255,255,255,0.2)',
-                  boxShadow: wireColor === c ? `0 0 8px ${c}` : 'none'
-                }}
-                title={`Select wire color`}
-              />
-            ))}
-          </div>
-        )}
+        <div 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '6px', 
+            marginLeft: '8px', 
+            padding: '4px 8px', 
+            background: activeTool === 'link' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0,0,0,0.25)', 
+            border: `1px solid ${activeTool === 'link' ? 'var(--accent)' : 'var(--border-subtle)'}`,
+            borderRadius: '6px',
+            transition: 'all 0.2s ease'
+          }}
+          title="Wire Color Selection (Click to pick color and switch to Create Links)"
+        >
+          {COLORS.map(c => (
+            <div 
+              key={c}
+              onClick={() => {
+                if (setWireColor) setWireColor(c);
+                if (activeTool !== 'link' && setActiveTool) setActiveTool('link');
+                if (activeLinkId && setLinks) {
+                  setLinks(prev => prev.map(l => l.id === activeLinkId ? { ...l, color: c } : l));
+                }
+              }}
+              style={{ 
+                width: '18px', 
+                height: '18px', 
+                borderRadius: '50%', 
+                background: c, 
+                cursor: 'pointer',
+                border: wireColor === c ? '2px solid white' : '1px solid rgba(255,255,255,0.25)',
+                boxShadow: wireColor === c ? `0 0 8px ${c}` : 'none',
+                transform: wireColor === c ? 'scale(1.15)' : 'scale(1)',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+              }}
+              title={`Wire color: ${c}`}
+            />
+          ))}
+        </div>
         
         <div style={{ width: '1px', height: '24px', background: 'var(--border-active)', margin: '0 8px' }}></div>
         
