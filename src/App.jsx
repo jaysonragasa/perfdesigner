@@ -13,11 +13,12 @@ import MacroBuilderModal from './components/MacroBuilderModal';
 import LayersPanel from './components/LayersPanel';
 import StatusBar from './components/StatusBar';
 import BoardInfoPanel from './components/BoardInfoPanel';
+import { BUILTIN_JSON_COMPONENTS } from './data/builtinComponents';
 
 // Default status messages shown per active tool. Individual actions can override
 // the status bar via setStatusMessage for more contextual hints.
 const TOOL_STATUS = {
-  select: 'Select and drag components. Press CTRL+G to create a new component from the selection. Hold middle-click to pan, scroll to zoom.',
+  select: 'Select and drag components. CTRL+G to group, CTRL+SHIFT+G to ungroup. Hold middle-click to pan, scroll to zoom.',
   component: 'Click a hole on the board to place the selected component.',
   link: 'Press CTRL+LEFT CLICK to create a new link.'
 };
@@ -125,7 +126,69 @@ function App() {
     setStatusMessage(TOOL_STATUS[activeTool] || TOOL_STATUS.select);
   }, [activeTool]);
 
-  // Press ESC to end current link
+  const handleUngroupComponents = (targetIds = selectedComponentIds) => {
+    if (!targetIds || targetIds.length === 0) return;
+
+    let hasUngroupedAny = false;
+    const newComponentsList = [];
+    const newlyAddedIds = [];
+    const ungroupedTargetIds = [];
+
+    components.forEach(comp => {
+      if (!targetIds.includes(comp.id)) {
+        newComponentsList.push(comp);
+        return;
+      }
+
+      // Check if this component has childComponents
+      let def = null;
+      if (comp.type.startsWith('custom_')) {
+        def = customComponents.find(c => c.id === comp.type);
+      } else {
+        const builtin = BUILTIN_JSON_COMPONENTS.find(c => c.id === comp.type || (c.aliases && c.aliases.includes(comp.type)));
+        if (builtin) def = builtin.def;
+      }
+
+      if (def && def.childComponents && def.childComponents.length > 0) {
+        hasUngroupedAny = true;
+        ungroupedTargetIds.push(comp.id);
+        const rad = ((comp.rotation || 0) * Math.PI) / 180;
+        const cos = Math.round(Math.cos(rad));
+        const sin = Math.round(Math.sin(rad));
+
+        def.childComponents.forEach((child, idx) => {
+          const rx = child.x * cos - child.y * sin;
+          const ry = child.x * sin + child.y * cos;
+          const childId = `comp_${Date.now()}_${idx}_${Math.floor(Math.random() * 10000)}`;
+
+          newlyAddedIds.push(childId);
+          newComponentsList.push({
+            id: childId,
+            type: child.type,
+            x: comp.x + rx,
+            y: comp.y + ry,
+            layer: child.layer || comp.layer || activeLayerId || 'top',
+            rotation: (((child.rotation || 0) + (comp.rotation || 0)) % 360 + 360) % 360,
+            width: child.width !== undefined ? child.width : null,
+            height: child.height !== undefined ? child.height : null,
+            params: child.params ? JSON.parse(JSON.stringify(child.params)) : undefined
+          });
+        });
+      } else {
+        // Not a group component, preserve as is
+        newComponentsList.push(comp);
+      }
+    });
+
+    if (hasUngroupedAny) {
+      setComponents(newComponentsList);
+      const retainedIds = targetIds.filter(id => !ungroupedTargetIds.includes(id));
+      setSelectedComponentIds([...retainedIds, ...newlyAddedIds]);
+      setStatusMessage(`Ungrouped component into ${newlyAddedIds.length} items.`);
+    }
+  };
+
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Don't fire shortcuts when typing in an input/textarea
@@ -199,11 +262,27 @@ function App() {
               : c
           ));
         }
+        return;
+      }
+
+      // Group (Ctrl+G) and Ungroup (Ctrl+Shift+G)
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'g' || e.key === 'G')) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          if (selectedComponentIds.length > 0) {
+            handleUngroupComponents(selectedComponentIds);
+          }
+        } else {
+          if (selectedComponentIds.length > 0) {
+            setShowMacroBuilder(selectedComponentIds);
+          }
+        }
+        return;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTool, selectedComponentIds, components, clipboard]);
+  }, [activeTool, selectedComponentIds, components, clipboard, customComponents]);
 
   const handlePadClick = (x, y, e = null) => {
     const isCtrlClick = e && (e.ctrlKey || e.metaKey);
@@ -486,6 +565,7 @@ function App() {
             onGroupComponents={(selectedIds) => {
                setShowMacroBuilder(selectedIds);
             }}
+            onUngroupComponents={handleUngroupComponents}
             transform={boardTransform}
             setTransform={setBoardTransform}
             onEditComponent={(compId) => {

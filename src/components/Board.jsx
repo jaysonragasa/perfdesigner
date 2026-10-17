@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { renderComponent } from './ComponentShapes';
-import { RotateCw, Edit2, Trash2 } from 'lucide-react';
+import { RotateCw, Edit2, Trash2, Ungroup } from 'lucide-react';
 import { BUILTIN_JSON_COMPONENTS } from '../data/builtinComponents';
 
 const SPACING = 20; // SVG units between holes
@@ -149,7 +149,7 @@ export function getComponentPads(comp, customComponents = []) {
   }));
 }
 
-const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds, onResizeBoard }) => {
+const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, onUngroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds, onResizeBoard }) => {
   const svgRef = useRef(null);
   const justDraggedRef = useRef(false);
   
@@ -248,18 +248,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     return () => window.removeEventListener('click', handleClick);
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
-        e.preventDefault();
-        if (selectedComponentIds.length > 0 && onGroupComponents) {
-          onGroupComponents(selectedComponentIds);
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedComponentIds, onGroupComponents]);
+
 
   const handleMouseDown = (e) => {
     if (activeTool === 'select' || e.button === 1 || activeTool === 'component' || activeTool === 'link') {
@@ -789,6 +778,31 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                 <Edit2 size={18} />
               </button>
             )}
+
+            {(() => {
+              let def = null;
+              if (selectedComp.type.startsWith('custom_')) {
+                def = customComponents.find(c => c.id === selectedComp.type);
+              } else {
+                const builtin = BUILTIN_JSON_COMPONENTS.find(c => c.id === selectedComp.type || (c.aliases && c.aliases.includes(selectedComp.type)));
+                if (builtin) def = builtin.def;
+              }
+
+              if (def && def.childComponents && def.childComponents.length > 0) {
+                return (
+                  <button 
+                    className="tool-btn"
+                    title="Ungroup Component (Ctrl+Shift+G)"
+                    onClick={() => {
+                      if (onUngroupComponents) onUngroupComponents([selectedComp.id]);
+                    }}
+                  >
+                    <Ungroup size={18} />
+                  </button>
+                );
+              }
+              return null;
+            })()}
             
             <div style={{ width: '1px', background: 'var(--border-subtle)', margin: '4px 0' }}></div>
             
