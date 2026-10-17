@@ -90,6 +90,61 @@ export const BUILTIN_JSON_COMPONENTS = [
     }
   },
   {
+    "id": "mini560_5a",
+    "categoryId": "step_down",
+    "categoryName": "Step Down",
+    "name": "MINI 560 - 5A",
+    "icon": "⚡",
+    "def": {
+      "name": "MINI 560 - 5A",
+      "bodyWidth_mm": 30,
+      "bodyHeight_mm": 19,
+      "hideBody": false,
+      "pads": [
+        { "x": 0, "y": 0 },
+        { "x": 11, "y": 0 },
+        { "x": 0, "y": 1 },
+        { "x": 11, "y": 1 },
+        { "x": 0, "y": 5 },
+        { "x": 11, "y": 5 },
+        { "x": 0, "y": 6 },
+        { "x": 11, "y": 6 }
+      ],
+      "texts": [
+        {
+          "text": "+ OUT",
+          "size": 13,
+          "x": 1.3511166141047384,
+          "y": 5.483685292236618
+        },
+        {
+          "text": "- OUT",
+          "size": 13,
+          "x": 1.2664455245966715,
+          "y": 0.45986731475800346
+        },
+        {
+          "text": "IN +",
+          "size": 13,
+          "x": 9.987567743927528,
+          "y": 5.427237899231241
+        },
+        {
+          "text": "IN -",
+          "size": 13,
+          "x": 9.959344047424839,
+          "y": 0.4034199217526254
+        },
+        {
+          "text": "MINI 560 - 5A",
+          "size": 23,
+          "x": 5.5,
+          "y": 3
+        }
+      ]
+    }
+  },
+  {
     "id": "pca9685",
     "categoryId": "motor_drivers",
     "categoryName": "Motor Drivers",
