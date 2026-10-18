@@ -68,6 +68,39 @@ function App() {
   const [activeLinkId, setActiveLinkId] = useState(null);
   const [selectedComponentIds, setSelectedComponentIds] = useState([]);
   const [clipboard, setClipboard] = useState([]);
+  const [placingGhost, setPlacingGhost] = useState(null);
+
+  const handlePlaceGhost = (ghostPos) => {
+    if (!placingGhost) return;
+    const now = Date.now();
+    const newComps = placingGhost.items.map((item, i) => {
+      const finalX = Math.max(0, Math.min(boardSize.width - 1, ghostPos.x + (item.relX || 0)));
+      const finalY = Math.max(0, Math.min(boardSize.height - 1, ghostPos.y + (item.relY || 0)));
+      const { relX, relY, ...compRest } = item;
+      return {
+        ...compRest,
+        id: `${now}_${i}`,
+        layer: activeLayerId,
+        x: finalX,
+        y: finalY,
+        rotation: item.rotation || 0
+      };
+    });
+    setComponents(prev => [...prev, ...newComps]);
+    setSelectedComponentIds(newComps.map(c => c.id));
+    setPlacingGhost(null);
+    setStatusMessage(TOOL_STATUS[activeTool] || TOOL_STATUS.select);
+  };
+
+  const handleCancelGhost = () => {
+    if (!placingGhost) return;
+    if (placingGhost.cutOriginals) {
+      setComponents(prev => [...prev, ...placingGhost.cutOriginals]);
+      setSelectedComponentIds(placingGhost.cutOriginals.map(c => c.id));
+    }
+    setPlacingGhost(null);
+    setStatusMessage(TOOL_STATUS[activeTool] || TOOL_STATUS.select);
+  };
 
   // Auto-save session to localStorage
   useEffect(() => {
@@ -196,57 +229,96 @@ function App() {
       if (showComponentCreator || showBoardSettings || showComponentParams || showMacroBuilder) return;
 
       if (e.key === 'Escape') {
+        if (placingGhost) {
+          handleCancelGhost();
+          return;
+        }
         setActiveLinkId(null);
         if (activeTool === 'component') setActiveTool('select');
         return;
       }
 
       // Select All
-      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
         e.preventDefault();
         setSelectedComponentIds(components.map(c => c.id));
         return;
       }
 
-      // Copy
-      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+      // Copy (Ctrl+C): Copies selected components and immediately creates ghost preview attached to cursor
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
         if (selectedComponentIds.length > 0) {
           const copied = components.filter(c => selectedComponentIds.includes(c.id));
           setClipboard(copied);
+          const minX = Math.min(...copied.map(c => c.x));
+          const minY = Math.min(...copied.map(c => c.y));
+          setPlacingGhost({
+            items: copied.map(c => ({
+              ...c,
+              relX: c.x - minX,
+              relY: c.y - minY
+            })),
+            cutOriginals: null,
+            baseX: minX,
+            baseY: minY
+          });
+          setStatusMessage('Click to place copied component(s) • [R] to rotate • [Esc] to cancel');
         }
         return;
       }
 
-      // Cut
-      if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
+      // Cut (Ctrl+X): Cuts selected components and immediately creates ghost preview attached to cursor
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'x' || e.key === 'X')) {
         if (selectedComponentIds.length > 0) {
           const cut = components.filter(c => selectedComponentIds.includes(c.id));
           setClipboard(cut);
           setComponents(prev => prev.filter(c => !selectedComponentIds.includes(c.id)));
           setSelectedComponentIds([]);
+          const minX = Math.min(...cut.map(c => c.x));
+          const minY = Math.min(...cut.map(c => c.y));
+          setPlacingGhost({
+            items: cut.map(c => ({
+              ...c,
+              relX: c.x - minX,
+              relY: c.y - minY
+            })),
+            cutOriginals: cut,
+            baseX: minX,
+            baseY: minY
+          });
+          setStatusMessage('Click to place cut component(s) • [R] to rotate • [Esc] to cancel');
         }
         return;
       }
 
-      // Paste
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+      // Paste (Ctrl+V): Also starts ghost placement for clipboard items
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
         if (clipboard.length > 0) {
-          const now = Date.now();
-          const pasted = clipboard.map((c, i) => ({
-            ...c,
-            id: `${now}_${i}`,
-            layer: activeLayerId, // Always paste onto the current active layer
-            x: c.x + 2,
-            y: c.y + 2,
-          }));
-          setComponents(prev => [...prev, ...pasted]);
-          setSelectedComponentIds(pasted.map(c => c.id));
+          const minX = Math.min(...clipboard.map(c => c.x));
+          const minY = Math.min(...clipboard.map(c => c.y));
+          setPlacingGhost({
+            items: clipboard.map(c => ({
+              ...c,
+              relX: c.x - minX,
+              relY: c.y - minY
+            })),
+            cutOriginals: null,
+            baseX: minX,
+            baseY: minY
+          });
+          setStatusMessage('Click to place copied component(s) • [R] to rotate • [Esc] to cancel');
         }
         return;
       }
 
       // Delete
       if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (placingGhost) {
+          // If in ghost placement, cancel without restoring if cut
+          setPlacingGhost(null);
+          setStatusMessage(TOOL_STATUS[activeTool] || TOOL_STATUS.select);
+          return;
+        }
         if (selectedComponentIds.length > 0) {
           setComponents(prev => prev.filter(c => !selectedComponentIds.includes(c.id)));
           setSelectedComponentIds([]);
@@ -256,6 +328,28 @@ function App() {
 
       // Rotate (R)
       if (e.key === 'r' || e.key === 'R') {
+        if (placingGhost) {
+          setPlacingGhost(prev => {
+            if (!prev) return null;
+            const newItems = prev.items.map(item => ({
+              ...item,
+              rotation: ((item.rotation || 0) + 90) % 360,
+              relX: -item.relY,
+              relY: item.relX
+            }));
+            const minX = Math.min(...newItems.map(it => it.relX));
+            const minY = Math.min(...newItems.map(it => it.relY));
+            return {
+              ...prev,
+              items: newItems.map(it => ({
+                ...it,
+                relX: it.relX - minX,
+                relY: it.relY - minY
+              }))
+            };
+          });
+          return;
+        }
         if (selectedComponentIds.length > 0) {
           setComponents(prev => prev.map(c =>
             selectedComponentIds.includes(c.id)
@@ -283,7 +377,7 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTool, selectedComponentIds, components, clipboard, customComponents, showComponentCreator, showBoardSettings, showComponentParams, showMacroBuilder]);
+  }, [activeTool, selectedComponentIds, components, clipboard, customComponents, showComponentCreator, showBoardSettings, showComponentParams, showMacroBuilder, placingGhost, activeLayerId, boardSize]);
 
   const handlePadClick = (x, y, e = null) => {
     const isCtrlClick = e && (e.ctrlKey || e.metaKey);
@@ -581,6 +675,9 @@ function App() {
               }
             }}
             onResizeBoard={(newSize) => setBoardSize(newSize)}
+            placingGhost={placingGhost}
+            onPlaceGhost={handlePlaceGhost}
+            onCancelGhost={handleCancelGhost}
           />
           <BoardInfoPanel 
             boardSize={boardSize}

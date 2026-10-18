@@ -149,9 +149,25 @@ export function getComponentPads(comp, customComponents = []) {
   }));
 }
 
-const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, onUngroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds, onResizeBoard }) => {
+const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, onUngroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds, onResizeBoard, placingGhost = null, onPlaceGhost, onCancelGhost }) => {
   const svgRef = useRef(null);
   const justDraggedRef = useRef(false);
+  const currentMouseGridRef = useRef({ x: 0, y: 0 });
+
+  // Ghost placement position
+  const [ghostPos, setGhostPos] = useState(null);
+
+  useEffect(() => {
+    if (placingGhost) {
+      if (currentMouseGridRef.current) {
+        setGhostPos({ ...currentMouseGridRef.current });
+      } else {
+        setGhostPos({ x: placingGhost.baseX || 0, y: placingGhost.baseY || 0 });
+      }
+    } else {
+      setGhostPos(null);
+    }
+  }, [placingGhost]);
   
   // Pan and Zoom state
   const [isDragging, setIsDragging] = useState(false);
@@ -251,6 +267,14 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
 
 
   const handleMouseDown = (e) => {
+    if (placingGhost) {
+      if (e.button === 0 && ghostPos) {
+        if (onPlaceGhost) onPlaceGhost(ghostPos);
+      } else if (e.button === 2) {
+        if (onCancelGhost) onCancelGhost();
+      }
+      return;
+    }
     if (activeTool === 'select' || e.button === 1 || activeTool === 'component' || activeTool === 'link') {
       if (e.button === 1 || activeTool === 'select') {
         setIsDragging(true);
@@ -260,15 +284,10 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
   };
 
   const handleMouseMove = (e) => {
-    if (isDragging) {
-      setTransform(prev => ({
-        ...prev,
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      }));
-    } else if (draggedNode) {
-      const svg = svgRef.current;
-      if (!svg) return;
+    const svg = svgRef.current;
+    let snappedX = 0;
+    let snappedY = 0;
+    if (svg) {
       const rect = svg.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -276,11 +295,29 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
       const boardX = (mouseX - transform.x) / transform.scale / SPACING;
       const boardY = (mouseY - transform.y) / transform.scale / SPACING;
       
-      let snappedX = Math.round(boardX);
-      let snappedY = Math.round(boardY);
+      snappedX = Math.round(boardX);
+      snappedY = Math.round(boardY);
       
       snappedX = Math.max(0, Math.min(snappedX, width - 1));
       snappedY = Math.max(0, Math.min(snappedY, height - 1));
+      currentMouseGridRef.current = { x: snappedX, y: snappedY };
+    }
+
+    if (placingGhost) {
+      if (!ghostPos || ghostPos.x !== snappedX || ghostPos.y !== snappedY) {
+        setGhostPos({ x: snappedX, y: snappedY });
+      }
+      return;
+    }
+
+    if (isDragging) {
+      setTransform(prev => ({
+        ...prev,
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      }));
+    } else if (draggedNode) {
+      if (!svg) return;
 
       setLinks(prev => {
          const newLinks = [...prev];
@@ -445,6 +482,10 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
 
   const handlePadInteraction = (x, y, e) => {
     if (isDragging || draggedNode) return;
+    if (placingGhost) {
+      if (onPlaceGhost) onPlaceGhost({ x, y });
+      return;
+    }
     onPadClick(x, y, e);
   };
 
@@ -452,13 +493,21 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
     <>
       <svg 
         ref={svgRef}
-      style={{ width: '100%', height: '100%', userSelect: 'none', cursor: isDragging ? 'grabbing' : (activeTool === 'select' ? 'grab' : 'crosshair') }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onContextMenu={(e) => e.preventDefault()}
-    >
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          userSelect: 'none', 
+          cursor: placingGhost ? 'copy' : (isDragging ? 'grabbing' : (activeTool === 'select' ? 'grab' : 'crosshair')) 
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          if (placingGhost && onCancelGhost) onCancelGhost();
+        }}
+      >
       <defs>
         <pattern id="bg-grid" width="40" height="40" patternUnits="userSpaceOnUse">
           <circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.05)" />
@@ -591,10 +640,23 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
               <g
                 key={comp.id}
                 opacity={dimInactiveLayers && activeLayerId !== compLayerId ? 0.5 : 1}
-                onMouseDown={(e) => { if (activeTool !== 'link') handleComponentMouseDown(e, comp); }}
-                onClick={(e) => { if (activeTool !== 'link') e.stopPropagation(); }}
+                onMouseDown={(e) => {
+                  if (placingGhost) {
+                    e.stopPropagation();
+                    if (onPlaceGhost && ghostPos) onPlaceGhost(ghostPos);
+                    return;
+                  }
+                  if (activeTool !== 'link') handleComponentMouseDown(e, comp);
+                }}
+                onClick={(e) => {
+                  if (placingGhost) {
+                    e.stopPropagation();
+                    return;
+                  }
+                  if (activeTool !== 'link') e.stopPropagation();
+                }}
                 style={{
-                  cursor: draggedComponent === comp.id ? 'grabbing' : 'grab',
+                  cursor: placingGhost ? 'copy' : (draggedComponent === comp.id ? 'grabbing' : 'grab'),
                   pointerEvents: activeTool === 'link' ? 'none' : 'auto'
                 }}
               >
@@ -616,6 +678,34 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
             );
           });
         })()}
+
+        {/* Ghost Placement Preview */}
+        {placingGhost && ghostPos && (
+          <g 
+            className="placement-ghost" 
+            opacity={0.65} 
+            style={{ 
+              pointerEvents: 'none', 
+              filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.75))' 
+            }}
+          >
+            {placingGhost.items.map((item, idx) => {
+              const compAtGhostPos = {
+                ...item,
+                id: `ghost_preview_${idx}`,
+                x: Math.max(0, Math.min(width - 1, ghostPos.x + (item.relX || 0))),
+                y: Math.max(0, Math.min(height - 1, ghostPos.y + (item.relY || 0))),
+                layer: activeLayerId,
+                rotation: item.rotation || 0
+              };
+              return (
+                <g key={compAtGhostPos.id}>
+                  {renderComponent(compAtGhostPos, activeLayerId, customComponents, true)}
+                </g>
+              );
+            })}
+          </g>
+        )}
 
         {/* Floating Board Resize Grips */}
         {onResizeBoard && (() => {
