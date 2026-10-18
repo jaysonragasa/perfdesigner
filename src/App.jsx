@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ZoomIn, ZoomOut } from 'lucide-react';
+import { ZoomIn, ZoomOut, FilePlus, Trash2, Save } from 'lucide-react';
 import './App.css';
 import Board, { getComponentPads } from './components/Board';
 import Toolbar from './components/Toolbar';
@@ -55,6 +55,7 @@ function App() {
   const [showComponentParams, setShowComponentParams] = useState(null);
   const [pendingComponentParams, setPendingComponentParams] = useState(null);
   const [showMacroBuilder, setShowMacroBuilder] = useState(null);
+  const [showNewDesignConfirm, setShowNewDesignConfirm] = useState(false);
   const [customComponents, setCustomComponents] = useState(() => savedSession?.customComponents || []);
   const [wireColor, setWireColor] = useState(() => savedSession?.wireColor || '#10b981'); // Default to green wire
   const [statusMessage, setStatusMessage] = useState(TOOL_STATUS.select);
@@ -257,6 +258,17 @@ function App() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (showNewDesignConfirm) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setShowNewDesignConfirm(false);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          confirmNewDesign();
+        }
+        return;
+      }
+
       // Don't fire shortcuts when typing in an input/textarea or when a modal is open
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (showComponentCreator || showBoardSettings || showComponentParams || showMacroBuilder) return;
@@ -507,15 +519,44 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
-  const handleNewDesign = () => {
-    if (window.confirm('Start a new design? Make sure you have exported your current design if needed.')) {
-      setComponents([]);
-      setLinks([]);
-      setBoardSize({ width: 32, height: 22 });
-      setSelectedComponentIds([]);
-      setActiveLinkId(null);
-      setBoardTransform({ x: 50, y: 50, scale: 1 });
+  const confirmNewDesign = () => {
+    setComponents([]);
+    setLinks([]);
+    setBoardSize({ width: 32, height: 22 });
+    setSelectedComponentIds([]);
+    setActiveLinkId(null);
+    setBoardTransform({ x: 50, y: 50, scale: 1 });
+    setPlacingGhost(null);
+    setClipboard([]);
+    setShowNewDesignConfirm(false);
+    try {
+      const blankSession = {
+        components: [],
+        links: [],
+        customComponents,
+        boardSize: { width: 32, height: 22 },
+        layers,
+        activeLayerId,
+        boardColor,
+        showGoldBorder,
+        dimInactiveLayers,
+        wireColor,
+        boardTransform: { x: 50, y: 50, scale: 1 },
+        updatedAt: Date.now()
+      };
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(blankSession));
+    } catch (e) {
+      console.warn('Failed to update autosave on new design', e);
     }
+    setStatusMessage('Started a new blank design');
+  };
+
+  const handleNewDesign = () => {
+    if (components.length === 0 && links.length === 0) {
+      confirmNewDesign();
+      return;
+    }
+    setShowNewDesignConfirm(true);
   };
 
   const handleOpenDesign = (e) => {
@@ -983,6 +1024,147 @@ function App() {
              setShowMacroBuilder(null);
           }}
         />
+      )}
+      {showNewDesignConfirm && (
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowNewDesignConfirm(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="glass-panel" 
+            style={{ 
+              width: '430px', 
+              maxWidth: '92vw',
+              borderRadius: '14px', 
+              background: 'rgba(18, 22, 32, 0.96)', 
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              borderBottom: '1px solid var(--border-subtle)',
+              background: 'rgba(255, 255, 255, 0.02)'
+            }}>
+              <div style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                background: 'rgba(239, 68, 68, 0.15)',
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <FilePlus size={20} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: 'var(--text-bright)' }}>
+                  Start New Blank Design?
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Clear current workspace and reset board
+                </p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '20px', fontSize: '13px', lineHeight: '1.5', color: 'var(--text-main)' }}>
+              <p style={{ margin: '0 0 14px' }}>
+                This will clear all <strong>{components.length} component{components.length === 1 ? '' : 's'}</strong> and <strong>{links.length} link{links.length === 1 ? '' : 's'}</strong> from the canvas and reset the board to default dimensions.
+              </p>
+              <div style={{
+                background: 'rgba(245, 158, 11, 0.08)',
+                border: '1px solid rgba(245, 158, 11, 0.25)',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px'
+              }}>
+                <span style={{ fontSize: '12px', color: '#fbbf24' }}>
+                  Want to keep your current progress? Export a backup first.
+                </span>
+                <button
+                  onClick={() => handleSaveDesign()}
+                  style={{
+                    background: 'rgba(245, 158, 11, 0.2)',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    color: '#fef3c7',
+                    padding: '4px 10px',
+                    borderRadius: '5px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title="Download JSON export now"
+                >
+                  <Save size={13} /> Export JSON
+                </button>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              padding: '12px 20px',
+              background: 'rgba(0, 0, 0, 0.2)',
+              borderTop: '1px solid var(--border-subtle)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px'
+            }}>
+              <button
+                className="tool-button"
+                onClick={() => setShowNewDesignConfirm(false)}
+                style={{ padding: '8px 16px', borderRadius: '6px' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmNewDesign}
+                style={{
+                  background: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                }}
+              >
+                <Trash2 size={15} /> Clear & Start New
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
