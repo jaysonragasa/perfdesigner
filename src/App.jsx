@@ -40,18 +40,10 @@ const loadSavedSession = () => {
 function App() {
   const [savedSession] = useState(() => loadSavedSession());
 
-  const [layers, setLayers] = useState(() => {
-    if (savedSession?.layers) {
-      return savedSession.layers.map(l => ({
-        ...l,
-        isSolder: l.isSolder !== undefined ? Boolean(l.isSolder) : (l.id === 'bottom')
-      }));
-    }
-    return [
-      { id: 'top', name: 'Top Layer', visible: true, isSolder: false },
-      { id: 'bottom', name: 'Bottom Layer', visible: true, isSolder: true }
-    ];
-  });
+  const [layers, setLayers] = useState(() => savedSession?.layers || [
+    { id: 'top', name: 'Top Layer', visible: true },
+    { id: 'bottom', name: 'Bottom Layer', visible: true }
+  ]);
   const [activeLayerId, setActiveLayerId] = useState(() => savedSession?.activeLayerId || 'top');
   const [showGoldBorder, setShowGoldBorder] = useState(() => savedSession?.showGoldBorder !== undefined ? savedSession.showGoldBorder : true);
   const [dimInactiveLayers, setDimInactiveLayers] = useState(() => savedSession?.dimInactiveLayers !== undefined ? savedSession.dimInactiveLayers : true);
@@ -404,15 +396,12 @@ function App() {
         if (data.links) setLinks(data.links);
         if (data.customComponents) setCustomComponents(data.customComponents);
         if (data.layers) {
-          setLayers(data.layers.map(l => ({
-            ...l,
-            isSolder: l.isSolder !== undefined ? Boolean(l.isSolder) : (l.id === 'bottom')
-          })));
+          setLayers(data.layers);
         } else {
           // Legacy support
           setLayers([
-            { id: 'top', name: 'Top Layer', visible: true, isSolder: false },
-            { id: 'bottom', name: 'Bottom Layer', visible: true, isSolder: true }
+            { id: 'top', name: 'Top Layer', visible: true },
+            { id: 'bottom', name: 'Bottom Layer', visible: true }
           ]);
         }
       } catch (err) {

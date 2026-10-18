@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, GripVertical, Plus, Trash2, Droplet, Cable } from 'lucide-react';
+import { Eye, EyeOff, GripVertical, Plus, Trash2 } from 'lucide-react';
 
 const LayersPanel = ({ layers, setLayers, activeLayerId, setActiveLayerId }) => {
   const [draggedIdx, setDraggedIdx] = useState(null);
@@ -58,8 +58,7 @@ const LayersPanel = ({ layers, setLayers, activeLayerId, setActiveLayerId }) => 
     const newLayer = {
       id,
       name: `Layer ${layers.length + 1}`,
-      visible: true,
-      isSolder: false
+      visible: true
     };
     setLayers([newLayer, ...layers]);
     setActiveLayerId(id);
@@ -183,43 +182,6 @@ const LayersPanel = ({ layers, setLayers, activeLayerId, setActiveLayerId }) => 
                 </span>
               )}
             </div>
-
-            {/* Solder Bridge / Wire toggle badge */}
-            {(() => {
-              const isSolder = layer.isSolder !== undefined ? Boolean(layer.isSolder) : (layer.id === 'bottom');
-              return (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setLayers(prev => prev.map(l => l.id === layer.id ? { 
-                      ...l, 
-                      isSolder: !isSolder 
-                    } : l));
-                  }}
-                  title={isSolder 
-                    ? "Solder Bridge layer (flat solder traces, no wire curling). Click to convert to Wire layer." 
-                    : "Wire layer (insulated jumper wires with curling arcs). Click to convert to Solder Bridge layer."}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    background: isSolder ? 'rgba(148, 163, 184, 0.18)' : 'rgba(59, 130, 246, 0.15)',
-                    border: `1px solid ${isSolder ? 'rgba(148, 163, 184, 0.35)' : 'rgba(59, 130, 246, 0.35)'}`,
-                    color: isSolder ? '#cbd5e1' : '#60a5fa',
-                    cursor: 'pointer',
-                    fontSize: '11px',
-                    fontWeight: '500',
-                    marginLeft: '6px'
-                  }}
-                >
-                  {isSolder ? <Droplet size={11} /> : <Cable size={11} />}
-                  <span>{isSolder ? 'Solder' : 'Wire'}</span>
-                </button>
-              );
-            })()}
 
             {(layer.id !== 'top' && layer.id !== 'bottom') && (
               <div 
