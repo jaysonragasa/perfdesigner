@@ -28,11 +28,14 @@ function getIntersection(A, B, C, D) {
   return null;
 }
 
-function generateLinkPath(link, index, allLinks) {
+function generateLinkPath(link, index, allLinks, layers = []) {
   if (link.points.length < 2) return '';
   
-  // Solder traces (bottom layer) just use simple lines without arcs
-  if (link.layer === 'bottom') {
+  const layerDef = layers.find(l => l.id === (link.layer || 'top'));
+  const isSolder = layerDef ? (layerDef.isSolder !== undefined ? Boolean(layerDef.isSolder) : layerDef.id === 'bottom') : (link.layer === 'bottom');
+
+  // Solder traces (solder bridge layers) just use simple lines without arcs
+  if (isSolder) {
     return `M ${link.points[0].x * SPACING} ${link.points[0].y * SPACING} ` + 
            link.points.slice(1).map(p => `L ${p.x * SPACING} ${p.y * SPACING}`).join(' ');
   }
@@ -50,6 +53,7 @@ function generateLinkPath(link, index, allLinks) {
     // Check against all PREVIOUS links on the same layer
     for (let prevIdx = 0; prevIdx < index; prevIdx++) {
       const prevLink = allLinks[prevIdx];
+      if ((prevLink.layer || 'top') !== (link.layer || 'top')) continue;
       for (let j = 0; j < prevLink.points.length - 1; j++) {
         const C = prevLink.points[j];
         const D = prevLink.points[j + 1];
@@ -527,15 +531,20 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
           orderedVisibleLayers.forEach(layerItem => {
             globallyOrderedLinks.push(...links.filter(l => (l.layer || 'top') === layerItem.id));
           });
+          const isLayerSolder = (layerId) => {
+            const l = layers.find(layer => layer.id === layerId);
+            return l ? (l.isSolder !== undefined ? Boolean(l.isSolder) : l.id === 'bottom') : (layerId === 'bottom');
+          };
+
           const linkPaths = {};
           globallyOrderedLinks.forEach((link, i) => {
-            linkPaths[link.id] = generateLinkPath(link, i, globallyOrderedLinks);
+            linkPaths[link.id] = generateLinkPath(link, i, globallyOrderedLinks, layers);
           });
 
           const renderLink = (link) => {
             if (link.points.length === 0) return null;
             const linkLayer = link.layer || 'top';
-            const isBottom = linkLayer === 'bottom';
+            const isSolder = isLayerSolder(linkLayer);
             const pathString = linkPaths[link.id];
 
             return (
@@ -548,8 +557,8 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                   <path
                     d={pathString}
                     fill="none"
-                    stroke={link.color || (isBottom ? 'var(--solder)' : 'var(--wire)')}
-                    strokeWidth={isBottom ? 10 : 6}
+                    stroke={link.color || (isSolder ? 'var(--solder)' : 'var(--wire)')}
+                    strokeWidth={isSolder ? 10 : 6}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     style={{ pointerEvents: 'none' }}
@@ -574,9 +583,9 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                   >
                     <circle r={12} fill="transparent" style={{ pointerEvents: 'all' }} />
                     <circle
-                      r={isBottom ? 6 : 4}
-                      fill={isBottom ? 'var(--solder-hover)' : '#fff'}
-                      stroke={link.color || (isBottom ? 'var(--solder)' : 'var(--wire)')}
+                      r={isSolder ? 6 : 4}
+                      fill={isSolder ? 'var(--solder-hover)' : '#fff'}
+                      stroke={link.color || (isSolder ? 'var(--solder)' : 'var(--wire)')}
                       strokeWidth="2"
                     />
                   </g>
