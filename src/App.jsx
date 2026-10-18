@@ -69,6 +69,39 @@ function App() {
   const [selectedComponentIds, setSelectedComponentIds] = useState([]);
   const [clipboard, setClipboard] = useState([]);
   const [placingGhost, setPlacingGhost] = useState(null);
+  const mouseGridRef = React.useRef({ x: 0, y: 0 });
+
+  const getSelectionBoundsAndCenter = (targets, customComponentsList) => {
+    const allPads = [];
+    targets.forEach(c => {
+      const pads = getComponentPads(c, customComponentsList);
+      pads.forEach(p => allPads.push(p));
+    });
+    if (allPads.length === 0) {
+      const xs = targets.map(c => c.x);
+      const ys = targets.map(c => c.y);
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+      return {
+        minX, maxX, minY, maxY,
+        centerX: Math.round((minX + maxX) / 2),
+        centerY: Math.round((minY + maxY) / 2)
+      };
+    }
+    const padXs = allPads.map(p => p.x);
+    const padYs = allPads.map(p => p.y);
+    const minX = Math.min(...padXs);
+    const maxX = Math.max(...padXs);
+    const minY = Math.min(...padYs);
+    const maxY = Math.max(...padYs);
+    return {
+      minX, maxX, minY, maxY,
+      centerX: Math.round((minX + maxX) / 2),
+      centerY: Math.round((minY + maxY) / 2)
+    };
+  };
 
   const handlePlaceGhost = (ghostPos) => {
     if (!placingGhost) return;
@@ -245,66 +278,83 @@ function App() {
         return;
       }
 
-      // Copy (Ctrl+C): Copies selected components and immediately creates ghost preview attached to cursor
+      // Copy (Ctrl+C): Copies selected components and immediately creates ghost preview aligned to cursor
       if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
         if (selectedComponentIds.length > 0) {
           const copied = components.filter(c => selectedComponentIds.includes(c.id));
           setClipboard(copied);
-          const minX = Math.min(...copied.map(c => c.x));
-          const minY = Math.min(...copied.map(c => c.y));
+          const { minX, maxX, minY, maxY, centerX, centerY } = getSelectionBoundsAndCenter(copied, customComponents);
+          const mx = mouseGridRef.current?.x;
+          const my = mouseGridRef.current?.y;
+          let anchorX = centerX;
+          let anchorY = centerY;
+          if (mx !== undefined && my !== undefined && mx >= minX - 1 && mx <= maxX + 1 && my >= minY - 1 && my <= maxY + 1) {
+            anchorX = mx;
+            anchorY = my;
+          }
           setPlacingGhost({
             items: copied.map(c => ({
               ...c,
-              relX: c.x - minX,
-              relY: c.y - minY
+              relX: c.x - anchorX,
+              relY: c.y - anchorY
             })),
             cutOriginals: null,
-            baseX: minX,
-            baseY: minY
+            baseX: anchorX,
+            baseY: anchorY
           });
           setStatusMessage('Click to place copied component(s) • [R] to rotate • [Esc] to cancel');
         }
         return;
       }
 
-      // Cut (Ctrl+X): Cuts selected components and immediately creates ghost preview attached to cursor
+      // Cut (Ctrl+X): Cuts selected components and immediately creates ghost preview aligned to cursor
       if ((e.ctrlKey || e.metaKey) && (e.key === 'x' || e.key === 'X')) {
         if (selectedComponentIds.length > 0) {
           const cut = components.filter(c => selectedComponentIds.includes(c.id));
           setClipboard(cut);
           setComponents(prev => prev.filter(c => !selectedComponentIds.includes(c.id)));
           setSelectedComponentIds([]);
-          const minX = Math.min(...cut.map(c => c.x));
-          const minY = Math.min(...cut.map(c => c.y));
+          const { minX, maxX, minY, maxY, centerX, centerY } = getSelectionBoundsAndCenter(cut, customComponents);
+          const mx = mouseGridRef.current?.x;
+          const my = mouseGridRef.current?.y;
+          let anchorX = centerX;
+          let anchorY = centerY;
+          if (mx !== undefined && my !== undefined && mx >= minX - 1 && mx <= maxX + 1 && my >= minY - 1 && my <= maxY + 1) {
+            anchorX = mx;
+            anchorY = my;
+          }
           setPlacingGhost({
             items: cut.map(c => ({
               ...c,
-              relX: c.x - minX,
-              relY: c.y - minY
+              relX: c.x - anchorX,
+              relY: c.y - anchorY
             })),
             cutOriginals: cut,
-            baseX: minX,
-            baseY: minY
+            baseX: anchorX,
+            baseY: anchorY
           });
           setStatusMessage('Click to place cut component(s) • [R] to rotate • [Esc] to cancel');
         }
         return;
       }
 
-      // Paste (Ctrl+V): Also starts ghost placement for clipboard items
+      // Paste (Ctrl+V): Also starts ghost placement for clipboard items centered on cursor
       if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
         if (clipboard.length > 0) {
-          const minX = Math.min(...clipboard.map(c => c.x));
-          const minY = Math.min(...clipboard.map(c => c.y));
+          const { centerX, centerY } = getSelectionBoundsAndCenter(clipboard, customComponents);
+          const mx = mouseGridRef.current?.x;
+          const my = mouseGridRef.current?.y;
+          const anchorX = mx !== undefined ? mx : centerX;
+          const anchorY = my !== undefined ? my : centerY;
           setPlacingGhost({
             items: clipboard.map(c => ({
               ...c,
-              relX: c.x - minX,
-              relY: c.y - minY
+              relX: c.x - centerX,
+              relY: c.y - centerY
             })),
             cutOriginals: null,
-            baseX: minX,
-            baseY: minY
+            baseX: anchorX,
+            baseY: anchorY
           });
           setStatusMessage('Click to place copied component(s) • [R] to rotate • [Esc] to cancel');
         }
@@ -331,20 +381,13 @@ function App() {
         if (placingGhost) {
           setPlacingGhost(prev => {
             if (!prev) return null;
-            const newItems = prev.items.map(item => ({
-              ...item,
-              rotation: ((item.rotation || 0) + 90) % 360,
-              relX: -item.relY,
-              relY: item.relX
-            }));
-            const minX = Math.min(...newItems.map(it => it.relX));
-            const minY = Math.min(...newItems.map(it => it.relY));
             return {
               ...prev,
-              items: newItems.map(it => ({
-                ...it,
-                relX: it.relX - minX,
-                relY: it.relY - minY
+              items: prev.items.map(item => ({
+                ...item,
+                rotation: ((item.rotation || 0) + 90) % 360,
+                relX: -item.relY,
+                relY: item.relX
               }))
             };
           });
@@ -678,6 +721,7 @@ function App() {
             placingGhost={placingGhost}
             onPlaceGhost={handlePlaceGhost}
             onCancelGhost={handleCancelGhost}
+            onMouseGridChange={(pos) => { mouseGridRef.current = pos; }}
           />
           <BoardInfoPanel 
             boardSize={boardSize}

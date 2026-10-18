@@ -30,14 +30,8 @@ function getIntersection(A, B, C, D) {
 
 function generateLinkPath(link, index, allLinks) {
   if (link.points.length < 2) return '';
-  
-  // Solder traces (bottom layer) just use simple lines without arcs
-  if (link.layer === 'bottom') {
-    return `M ${link.points[0].x * SPACING} ${link.points[0].y * SPACING} ` + 
-           link.points.slice(1).map(p => `L ${p.x * SPACING} ${p.y * SPACING}`).join(' ');
-  }
 
-  // Wires (top layer) jump over earlier wires
+  // Wires jump over earlier wires on the same layer
   let d = `M ${link.points[0].x * SPACING} ${link.points[0].y * SPACING}`;
   const JUMP_R = 8; // Arc radius in pixels
   
@@ -50,6 +44,7 @@ function generateLinkPath(link, index, allLinks) {
     // Check against all PREVIOUS links on the same layer
     for (let prevIdx = 0; prevIdx < index; prevIdx++) {
       const prevLink = allLinks[prevIdx];
+      if ((prevLink.layer || 'top') !== (link.layer || 'top')) continue;
       for (let j = 0; j < prevLink.points.length - 1; j++) {
         const C = prevLink.points[j];
         const D = prevLink.points[j + 1];
@@ -149,7 +144,7 @@ export function getComponentPads(comp, customComponents = []) {
   }));
 }
 
-const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, onUngroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds, onResizeBoard, placingGhost = null, onPlaceGhost, onCancelGhost }) => {
+const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInactiveLayers, boardColor, components, setComponents, links, setLinks, activeLinkId, onPadClick, activeTool, customComponents = [], onEditComponent, onGroupComponents, onUngroupComponents, transform, setTransform, selectedComponentIds = [], setSelectedComponentIds, onResizeBoard, placingGhost = null, onPlaceGhost, onCancelGhost, onMouseGridChange }) => {
   const svgRef = useRef(null);
   const justDraggedRef = useRef(false);
   const currentMouseGridRef = useRef({ x: 0, y: 0 });
@@ -159,10 +154,10 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
 
   useEffect(() => {
     if (placingGhost) {
-      if (currentMouseGridRef.current) {
+      if (placingGhost.baseX !== undefined && placingGhost.baseY !== undefined) {
+        setGhostPos({ x: placingGhost.baseX, y: placingGhost.baseY });
+      } else if (currentMouseGridRef.current) {
         setGhostPos({ ...currentMouseGridRef.current });
-      } else {
-        setGhostPos({ x: placingGhost.baseX || 0, y: placingGhost.baseY || 0 });
       }
     } else {
       setGhostPos(null);
@@ -301,6 +296,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
       snappedX = Math.max(0, Math.min(snappedX, width - 1));
       snappedY = Math.max(0, Math.min(snappedY, height - 1));
       currentMouseGridRef.current = { x: snappedX, y: snappedY };
+      if (onMouseGridChange) onMouseGridChange({ x: snappedX, y: snappedY });
     }
 
     if (placingGhost) {
@@ -598,7 +594,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                     d={pathString}
                     fill="none"
                     stroke={link.color || (isBottom ? 'var(--solder)' : 'var(--wire)')}
-                    strokeWidth={isBottom ? 10 : 6}
+                    strokeWidth={6}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     style={{ pointerEvents: 'none' }}
@@ -623,7 +619,7 @@ const Board = ({ width, height, layers, activeLayerId, showGoldBorder, dimInacti
                   >
                     <circle r={12} fill="transparent" style={{ pointerEvents: 'all' }} />
                     <circle
-                      r={isBottom ? 6 : 4}
+                      r={4}
                       fill={isBottom ? 'var(--solder-hover)' : '#fff'}
                       stroke={link.color || (isBottom ? 'var(--solder)' : 'var(--wire)')}
                       strokeWidth="2"
