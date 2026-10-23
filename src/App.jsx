@@ -193,16 +193,6 @@ function App() {
     setStatusMessage(TOOL_STATUS[activeTool] || TOOL_STATUS.select);
   }, [activeTool]);
 
-  // Load design if ?design=... query parameter is in URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const designFile = params.get('design');
-    if (designFile) {
-      const fetchUrl = designFile.startsWith('/') ? designFile : `/designs/${designFile}`;
-      handleLoadExample(fetchUrl);
-    }
-  }, []);
-
   const handleUngroupComponents = (targetIds = selectedComponentIds) => {
     if (!targetIds || targetIds.length === 0) return;
 
@@ -600,27 +590,6 @@ function App() {
     e.target.value = null; // reset
   };
 
-  const handleLoadExample = (examplePath = '/designs/esp32s3_pca9685_servo_controller.json') => {
-    fetch(examplePath)
-      .then(res => res.json())
-      .then(data => {
-        if (data.boardSize) setBoardSize(data.boardSize);
-        if (data.boardColor) setBoardColor(data.boardColor);
-        if (data.showGoldBorder !== undefined) setShowGoldBorder(data.showGoldBorder);
-        if (data.dimInactiveLayers !== undefined) setDimInactiveLayers(data.dimInactiveLayers);
-        if (data.components) setComponents(data.components);
-        if (data.links) setLinks(data.links);
-        if (data.customComponents) setCustomComponents(data.customComponents);
-        if (data.layers) setLayers(data.layers);
-        if (data.boardTransform) setBoardTransform(data.boardTransform);
-        setStatusMessage('Loaded: ESP32-S3 + PCA9685 + Mini360 + Mini560 Servo Controller');
-      })
-      .catch(err => {
-        console.error('Failed to load example design:', err);
-        setStatusMessage('Failed to load example circuit design');
-      });
-  };
-
   const handleImportComponents = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
@@ -738,7 +707,6 @@ function App() {
         onSaveDesign={handleSaveDesign}
         onOpenDesign={handleOpenDesign}
         onNewDesign={handleNewDesign}
-        onLoadExample={handleLoadExample}
         boardTransform={boardTransform}
         setBoardTransform={setBoardTransform}
         setLinks={setLinks}
