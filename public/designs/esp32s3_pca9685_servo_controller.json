@@ -1,6 +1,6 @@
 {
   "boardSize": {
-    "width": 44,
+    "width": 48,
     "height": 30
   },
   "boardColor": "#142e1d",
@@ -8,7 +8,7 @@
   "dimInactiveLayers": true,
   "wireColor": "#10b981",
   "boardTransform": {
-    "x": 60,
+    "x": 50,
     "y": 35,
     "scale": 0.95
   },
@@ -29,7 +29,7 @@
       "id": "comp_pwr_in",
       "type": "male_header",
       "x": 2,
-      "y": 13,
+      "y": 14,
       "rotation": 0,
       "width": 2,
       "height": 1,
@@ -43,7 +43,7 @@
       "id": "comp_mini360",
       "type": "mini360_5v_3a",
       "x": 6,
-      "y": 3,
+      "y": 4,
       "rotation": 0,
       "width": 7,
       "height": 4,
@@ -53,8 +53,8 @@
     {
       "id": "comp_mini560",
       "type": "mini560_5a",
-      "x": 6,
-      "y": 19,
+      "x": 4,
+      "y": 20,
       "rotation": 0,
       "width": 12,
       "height": 7,
@@ -64,8 +64,8 @@
     {
       "id": "comp_esp32s3",
       "type": "esp32s3_supermini",
-      "x": 17,
-      "y": 3,
+      "x": 18,
+      "y": 4,
       "rotation": 0,
       "width": 9,
       "height": 7,
@@ -75,8 +75,8 @@
     {
       "id": "comp_pca9685",
       "type": "pca9685",
-      "x": 16,
-      "y": 14,
+      "x": 20,
+      "y": 16,
       "rotation": 0,
       "width": 24,
       "height": 9,
@@ -86,8 +86,8 @@
     {
       "id": "comp_c1_servo",
       "type": "electrolytic",
-      "x": 30,
-      "y": 22,
+      "x": 34,
+      "y": 24,
       "rotation": 0,
       "width": 3,
       "height": 1,
@@ -99,8 +99,8 @@
     {
       "id": "comp_c2_logic",
       "type": "electrolytic",
-      "x": 14,
-      "y": 1,
+      "x": 15,
+      "y": 2,
       "rotation": 0,
       "width": 2,
       "height": 1,
@@ -112,8 +112,8 @@
     {
       "id": "comp_c3_decoupling",
       "type": "capacitor",
-      "x": 19,
-      "y": 1,
+      "x": 20,
+      "y": 2,
       "rotation": 0,
       "width": 2,
       "height": 1,
@@ -125,8 +125,8 @@
     {
       "id": "comp_r1_sda",
       "type": "resistor",
-      "x": 28,
-      "y": 6,
+      "x": 30,
+      "y": 7,
       "rotation": 0,
       "width": 5,
       "height": 1,
@@ -145,8 +145,8 @@
     {
       "id": "comp_r2_scl",
       "type": "resistor",
-      "x": 28,
-      "y": 8,
+      "x": 30,
+      "y": 9,
       "rotation": 0,
       "width": 5,
       "height": 1,
@@ -165,235 +165,162 @@
   ],
   "links": [
     {
-      "id": "link_vin_mini360",
+      "id": "link_vin_to_mini360",
       "color": "#f97316",
       "layer": "bottom",
       "points": [
         {
           "x": 2,
-          "y": 13
+          "y": 14
         },
         {
-          "x": 4,
-          "y": 13
-        },
-        {
-          "x": 12,
-          "y": 13
+          "x": 2,
+          "y": 7
         },
         {
           "x": 12,
-          "y": 6
+          "y": 7
         }
       ]
     },
     {
-      "id": "link_vin_mini560",
+      "id": "link_vin_to_mini560",
       "color": "#f97316",
       "layer": "bottom",
       "points": [
         {
           "x": 2,
-          "y": 13
+          "y": 14
         },
         {
-          "x": 4,
-          "y": 13
+          "x": 2,
+          "y": 26
         },
         {
-          "x": 4,
-          "y": 24
-        },
-        {
-          "x": 17,
-          "y": 24
+          "x": 15,
+          "y": 26
         }
       ]
     },
     {
-      "id": "link_gnd_mini360",
+      "id": "link_gnd_to_mini360",
       "color": "#334155",
       "layer": "bottom",
       "points": [
         {
           "x": 3,
-          "y": 13
+          "y": 14
         },
         {
           "x": 3,
-          "y": 9
+          "y": 4
         },
         {
           "x": 12,
-          "y": 9
-        },
-        {
-          "x": 12,
-          "y": 3
+          "y": 4
         }
       ]
     },
     {
-      "id": "link_gnd_mini560",
+      "id": "link_gnd_to_mini560",
       "color": "#334155",
       "layer": "bottom",
       "points": [
         {
           "x": 3,
-          "y": 13
+          "y": 14
         },
         {
           "x": 3,
-          "y": 19
+          "y": 21
         },
         {
-          "x": 17,
-          "y": 19
+          "x": 15,
+          "y": 21
         }
       ]
     },
     {
-      "id": "link_gnd_esp32",
+      "id": "link_gnd_mini360_esp32",
       "color": "#334155",
       "layer": "bottom",
       "points": [
         {
           "x": 6,
-          "y": 3
+          "y": 4
         },
         {
           "x": 14,
-          "y": 3
+          "y": 4
         },
         {
-          "x": 18,
-          "y": 3
+          "x": 19,
+          "y": 4
         }
       ]
     },
     {
-      "id": "link_common_gnd_bus",
+      "id": "link_common_gnd_tie",
       "color": "#334155",
       "layer": "bottom",
       "points": [
         {
           "x": 12,
-          "y": 3
+          "y": 4
+        },
+        {
+          "x": 14,
+          "y": 4
+        },
+        {
+          "x": 14,
+          "y": 21
         },
         {
           "x": 15,
-          "y": 3
-        },
-        {
-          "x": 15,
-          "y": 19
-        },
-        {
-          "x": 17,
-          "y": 19
+          "y": 21
         }
       ]
     },
     {
-      "id": "link_servo_gnd_terminal",
+      "id": "link_servo_gnd_bus",
       "color": "#334155",
       "layer": "bottom",
       "points": [
         {
-          "x": 6,
-          "y": 19
+          "x": 4,
+          "y": 20
         },
         {
-          "x": 6,
-          "y": 22
+          "x": 4,
+          "y": 28
         },
         {
-          "x": 27,
-          "y": 22
+          "x": 31,
+          "y": 28
+        },
+        {
+          "x": 31,
+          "y": 24
         }
       ]
     },
     {
-      "id": "link_c1_gnd",
+      "id": "link_c1_negative",
       "color": "#334155",
       "layer": "bottom",
       "points": [
         {
-          "x": 27,
-          "y": 22
-        },
-        {
-          "x": 27,
-          "y": 26
-        },
-        {
-          "x": 32,
-          "y": 26
-        },
-        {
-          "x": 32,
-          "y": 22
-        }
-      ]
-    },
-    {
-      "id": "link_servo_vplus_terminal",
-      "color": "#dc2626",
-      "layer": "bottom",
-      "points": [
-        {
-          "x": 6,
+          "x": 36,
           "y": 24
         },
         {
-          "x": 28,
-          "y": 24
+          "x": 36,
+          "y": 28
         },
         {
-          "x": 28,
-          "y": 22
-        }
-      ]
-    },
-    {
-      "id": "link_c1_vplus",
-      "color": "#dc2626",
-      "layer": "bottom",
-      "points": [
-        {
-          "x": 28,
-          "y": 22
-        },
-        {
-          "x": 30,
-          "y": 22
-        }
-      ]
-    },
-    {
-      "id": "link_pca_vplus_header",
-      "color": "#dc2626",
-      "layer": "bottom",
-      "points": [
-        {
-          "x": 28,
-          "y": 22
-        },
-        {
-          "x": 28,
-          "y": 25
-        },
-        {
-          "x": 40,
-          "y": 25
-        },
-        {
-          "x": 40,
-          "y": 16
-        },
-        {
-          "x": 39,
-          "y": 16
+          "x": 31,
+          "y": 28
         }
       ]
     },
@@ -403,47 +330,108 @@
       "layer": "bottom",
       "points": [
         {
-          "x": 39,
-          "y": 21
+          "x": 43,
+          "y": 23
         },
         {
-          "x": 41,
-          "y": 21
+          "x": 45,
+          "y": 23
         },
         {
-          "x": 41,
-          "y": 27
+          "x": 45,
+          "y": 28
         },
         {
-          "x": 27,
-          "y": 27
-        },
-        {
-          "x": 27,
-          "y": 22
+          "x": 31,
+          "y": 28
         }
       ]
     },
     {
-      "id": "link_esp32_5v",
+      "id": "link_servo_vplus_bus",
+      "color": "#dc2626",
+      "layer": "bottom",
+      "points": [
+        {
+          "x": 4,
+          "y": 25
+        },
+        {
+          "x": 4,
+          "y": 27
+        },
+        {
+          "x": 32,
+          "y": 27
+        },
+        {
+          "x": 32,
+          "y": 24
+        }
+      ]
+    },
+    {
+      "id": "link_c1_positive",
+      "color": "#dc2626",
+      "layer": "bottom",
+      "points": [
+        {
+          "x": 34,
+          "y": 24
+        },
+        {
+          "x": 32,
+          "y": 24
+        }
+      ]
+    },
+    {
+      "id": "link_pca_vplus_header",
+      "color": "#dc2626",
+      "layer": "bottom",
+      "points": [
+        {
+          "x": 32,
+          "y": 24
+        },
+        {
+          "x": 32,
+          "y": 27
+        },
+        {
+          "x": 44,
+          "y": 27
+        },
+        {
+          "x": 44,
+          "y": 18
+        },
+        {
+          "x": 43,
+          "y": 18
+        }
+      ]
+    },
+    {
+      "id": "link_esp32_5v_logic",
       "color": "#ef4444",
       "layer": "top",
       "points": [
         {
           "x": 6,
-          "y": 6
+          "y": 7
         },
         {
           "x": 14,
-          "y": 6
+          "y": 7
         },
         {
           "x": 14,
-          "y": 3
+          "y": 4
         },
         {
-          "x": 17,
-          "y": 3
+          "x": 18,
+          "y": 4
         }
       ]
     },
@@ -453,16 +441,16 @@
       "layer": "top",
       "points": [
         {
-          "x": 14,
-          "y": 1
+          "x": 15,
+          "y": 2
         },
         {
-          "x": 14,
-          "y": 3
+          "x": 15,
+          "y": 4
         },
         {
-          "x": 17,
-          "y": 3
+          "x": 18,
+          "y": 4
         }
       ]
     },
@@ -472,20 +460,20 @@
       "layer": "top",
       "points": [
         {
-          "x": 15,
-          "y": 1
-        },
-        {
-          "x": 15,
+          "x": 16,
           "y": 2
         },
         {
-          "x": 18,
-          "y": 2
-        },
-        {
-          "x": 18,
+          "x": 16,
           "y": 3
+        },
+        {
+          "x": 19,
+          "y": 3
+        },
+        {
+          "x": 19,
+          "y": 4
         }
       ]
     },
@@ -495,12 +483,12 @@
       "layer": "top",
       "points": [
         {
-          "x": 19,
-          "y": 1
+          "x": 20,
+          "y": 2
         },
         {
-          "x": 19,
-          "y": 3
+          "x": 20,
+          "y": 4
         }
       ]
     },
@@ -510,58 +498,47 @@
       "layer": "top",
       "points": [
         {
-          "x": 20,
-          "y": 1
-        },
-        {
-          "x": 20,
+          "x": 21,
           "y": 2
         },
         {
-          "x": 18,
-          "y": 2
-        },
-        {
-          "x": 18,
+          "x": 21,
           "y": 3
-        }
-      ]
-    },
-    {
-      "id": "link_3v3_bus",
-      "color": "#06b6d4",
-      "layer": "top",
-      "points": [
+        },
         {
           "x": 19,
           "y": 3
         },
         {
           "x": 19,
-          "y": 1
-        },
-        {
-          "x": 28,
-          "y": 1
-        },
-        {
-          "x": 28,
-          "y": 6
+          "y": 4
         }
       ]
     },
     {
-      "id": "link_3v3_to_r2",
+      "id": "link_3v3_bus_pullups",
       "color": "#06b6d4",
       "layer": "top",
       "points": [
         {
-          "x": 28,
-          "y": 6
+          "x": 20,
+          "y": 4
         },
         {
-          "x": 28,
-          "y": 8
+          "x": 20,
+          "y": 2
+        },
+        {
+          "x": 30,
+          "y": 2
+        },
+        {
+          "x": 30,
+          "y": 7
+        },
+        {
+          "x": 30,
+          "y": 9
         }
       ]
     },
@@ -571,139 +548,147 @@
       "layer": "top",
       "points": [
         {
-          "x": 28,
-          "y": 8
-        },
-        {
-          "x": 28,
-          "y": 11
-        },
-        {
-          "x": 39,
-          "y": 11
-        },
-        {
-          "x": 39,
-          "y": 17
-        }
-      ]
-    },
-    {
-      "id": "link_i2c_sda",
-      "color": "#10b981",
-      "layer": "top",
-      "points": [
-        {
-          "x": 24,
+          "x": 30,
           "y": 9
         },
         {
-          "x": 24,
-          "y": 10
+          "x": 30,
+          "y": 13
         },
         {
-          "x": 32,
-          "y": 10
+          "x": 41,
+          "y": 13
         },
         {
-          "x": 32,
-          "y": 6
-        }
-      ]
-    },
-    {
-      "id": "link_sda_to_pca",
-      "color": "#10b981",
-      "layer": "top",
-      "points": [
-        {
-          "x": 32,
-          "y": 6
-        },
-        {
-          "x": 36,
-          "y": 6
-        },
-        {
-          "x": 36,
-          "y": 18
-        },
-        {
-          "x": 39,
-          "y": 18
-        }
-      ]
-    },
-    {
-      "id": "link_i2c_scl",
-      "color": "#eab308",
-      "layer": "top",
-      "points": [
-        {
-          "x": 25,
-          "y": 9
-        },
-        {
-          "x": 25,
-          "y": 8
-        },
-        {
-          "x": 32,
-          "y": 8
-        }
-      ]
-    },
-    {
-      "id": "link_scl_to_pca",
-      "color": "#eab308",
-      "layer": "top",
-      "points": [
-        {
-          "x": 32,
-          "y": 8
-        },
-        {
-          "x": 37,
-          "y": 8
-        },
-        {
-          "x": 37,
+          "x": 41,
           "y": 19
         },
         {
-          "x": 39,
+          "x": 43,
           "y": 19
         }
       ]
     },
     {
-      "id": "link_pca_oe",
+      "id": "link_i2c_sda_pullup",
+      "color": "#10b981",
+      "layer": "top",
+      "points": [
+        {
+          "x": 25,
+          "y": 10
+        },
+        {
+          "x": 25,
+          "y": 12
+        },
+        {
+          "x": 34,
+          "y": 12
+        },
+        {
+          "x": 34,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "link_i2c_sda_to_pca",
+      "color": "#10b981",
+      "layer": "top",
+      "points": [
+        {
+          "x": 34,
+          "y": 7
+        },
+        {
+          "x": 38,
+          "y": 7
+        },
+        {
+          "x": 38,
+          "y": 20
+        },
+        {
+          "x": 43,
+          "y": 20
+        }
+      ]
+    },
+    {
+      "id": "link_i2c_scl_pullup",
+      "color": "#eab308",
+      "layer": "top",
+      "points": [
+        {
+          "x": 26,
+          "y": 10
+        },
+        {
+          "x": 26,
+          "y": 14
+        },
+        {
+          "x": 34,
+          "y": 14
+        },
+        {
+          "x": 34,
+          "y": 9
+        }
+      ]
+    },
+    {
+      "id": "link_i2c_scl_to_pca",
+      "color": "#eab308",
+      "layer": "top",
+      "points": [
+        {
+          "x": 34,
+          "y": 9
+        },
+        {
+          "x": 39,
+          "y": 9
+        },
+        {
+          "x": 39,
+          "y": 21
+        },
+        {
+          "x": 43,
+          "y": 21
+        }
+      ]
+    },
+    {
+      "id": "link_pca_oe_control",
       "color": "#a855f7",
       "layer": "top",
       "points": [
         {
-          "x": 23,
-          "y": 9
+          "x": 24,
+          "y": 10
         },
         {
-          "x": 23,
-          "y": 12
+          "x": 24,
+          "y": 15
         },
         {
-          "x": 38,
-          "y": 12
+          "x": 40,
+          "y": 15
         },
         {
-          "x": 38,
-          "y": 20
+          "x": 40,
+          "y": 22
         },
         {
-          "x": 39,
-          "y": 20
+          "x": 43,
+          "y": 22
         }
       ]
     }
   ],
   "customComponents": [],
-  "updatedAt": 1792724815220
+  "updatedAt": 1792725041857
 }
