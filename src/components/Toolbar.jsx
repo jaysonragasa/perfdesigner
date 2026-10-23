@@ -9,13 +9,14 @@ import {
   PlusSquare,
   Settings,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  Sparkles
 } from 'lucide-react';
 
 // Order: Black, Red, Orange, Yellow, Brown, Violet, Green, White
 const COLORS = ['#171717', '#ef4444', '#f59e0b', '#facc15', '#8B4513', '#8b5cf6', '#10b981', '#f1f5f9'];
 
-const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, setShowComponentCreator, setShowBoardSettings, wireColor, setWireColor, onSaveDesign, onOpenDesign, onNewDesign, boardTransform, setBoardTransform, setLinks, activeLinkId }) => {
+const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, setShowComponentCreator, setShowBoardSettings, wireColor, setWireColor, onSaveDesign, onOpenDesign, onNewDesign, onLoadExample, boardTransform, setBoardTransform, setLinks, activeLinkId }) => {
   return (
     <div className="toolbar">
       <div className="toolbar-group">
@@ -126,6 +127,29 @@ const Toolbar = ({ activeLayerId, activeTool, setActiveTool, setActiveLinkId, se
         <button className="tool-btn" title="Export Design (JSON)" onClick={onSaveDesign}>
           <Save size={18} />
         </button>
+        {onLoadExample && (
+          <button 
+            className="tool-btn" 
+            title="Load Circuit: ESP32-S3 + PCA9685 Servo Controller" 
+            onClick={() => onLoadExample()}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              padding: '4px 10px', 
+              background: 'rgba(56, 189, 248, 0.1)', 
+              border: '1px solid rgba(56, 189, 248, 0.3)', 
+              color: '#38bdf8', 
+              borderRadius: '6px', 
+              fontSize: '12px', 
+              fontWeight: '600',
+              cursor: 'pointer' 
+            }}
+          >
+            <Sparkles size={14} />
+            <span>Load ESP32+PCA9685</span>
+          </button>
+        )}
         <div style={{ width: '1px', height: '24px', background: 'var(--border-subtle)', margin: '0 4px' }}></div>
         <div 
           title="Continuous Auto-Save is active. Changes are automatically saved to your browser's local storage."
